@@ -14,7 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      github_cache: {
+        Row: {
+          cache_key: string
+          content: string
+          fetched_at: string
+        }
+        Insert: {
+          cache_key: string
+          content: string
+          fetched_at?: string
+        }
+        Update: {
+          cache_key?: string
+          content?: string
+          fetched_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
