@@ -45,7 +45,7 @@ export const listSubjects = createServerFn({ method: "GET" })
     const json = (await res.json()) as Array<{ name: string; path: string; type: string }>;
     const entries: TreeEntry[] = json
       .filter((e) => e.type === "dir" || e.type === "file")
-      .map((e) => ({
+      .map((e): TreeEntry => ({
         name: e.name,
         path: e.path.replace(/^subjects\//, ""),
         type: e.type === "dir" ? "dir" : "file",

@@ -6,7 +6,7 @@ import { useServerFn } from "@tanstack/react-start";
 
 function TreeNode({ entry, depth, currentPath }: { entry: TreeEntry; depth: number; currentPath?: string }) {
   const [open, setOpen] = useState(false);
-  const fetchList = _u(listSubjects);
+  const fetchList = useServerFn(listSubjects);
   const { data, isLoading } = useQuery({
     queryKey: ["tree", entry.path],
     queryFn: () => fetchList({ data: { path: entry.path } }),
@@ -61,7 +61,7 @@ function TreeNode({ entry, depth, currentPath }: { entry: TreeEntry; depth: numb
 }
 
 export function SubjectTree({ currentPath }: { currentPath?: string }) {
-  const fetchList = _u(listSubjects);
+  const fetchList = useServerFn(listSubjects);
   const { data, isLoading } = useQuery({
     queryKey: ["tree", ""],
     queryFn: () => fetchList({ data: { path: "" } }),
