@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useServerFn, Link } from "@tanstack/react-router" as any;
-import { ChevronRight, ChevronDown, FolderClosed, FileText, Loader2 } from "lucide-react";
+import { ChevronRight, ChevronDown, FolderClosed, Loader2 } from "lucide-react";
 import { listSubjects, type TreeEntry } from "@/lib/github.functions";
-import { useServerFn as _u } from "@tanstack/react-start";
+import { useServerFn } from "@tanstack/react-start";
 
 function TreeNode({ entry, depth, currentPath }: { entry: TreeEntry; depth: number; currentPath?: string }) {
   const [open, setOpen] = useState(false);
