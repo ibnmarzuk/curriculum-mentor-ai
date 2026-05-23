@@ -6,6 +6,7 @@ import { getSubject } from "@/lib/github.functions";
 import { MarkdownView } from "@/components/MarkdownView";
 import { MentorChat } from "@/components/MentorChat";
 import { CodeReview } from "@/components/CodeReview";
+import { ProgressPanel } from "@/components/ProgressPanel";
 
 const subjectQuery = (path: string) =>
   queryOptions({
@@ -55,7 +56,7 @@ export const Route = createFileRoute("/subjects/$")({
   ),
 });
 
-type Tab = "brief" | "mentor" | "review";
+type Tab = "brief" | "mentor" | "review" | "progress";
 
 function SubjectPage() {
   const params = Route.useParams();
@@ -67,6 +68,7 @@ function SubjectPage() {
     { id: "brief", label: "Brief" },
     { id: "mentor", label: "Mentor chat" },
     { id: "review", label: "Code review" },
+    { id: "progress", label: "Progress" },
   ];
 
   return (
@@ -105,6 +107,7 @@ function SubjectPage() {
             <CodeReview subjectPath={path} />
           </div>
         )}
+        {tab === "progress" && <ProgressPanel subjectPath={path} />}
       </div>
     </div>
   );
