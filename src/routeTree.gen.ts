@@ -15,6 +15,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SubjectsIndexRouteImport } from './routes/subjects.index'
 import { Route as SubjectsSplatRouteImport } from './routes/subjects.$'
+import { Route as AppProfileRouteImport } from './routes/_app.profile'
 import { Route as AppMentorRouteImport } from './routes/_app.mentor'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppBrowseRouteImport } from './routes/_app.browse'
@@ -49,6 +50,11 @@ const SubjectsSplatRoute = SubjectsSplatRouteImport.update({
   path: '/$',
   getParentRoute: () => SubjectsRoute,
 } as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMentorRoute = AppMentorRouteImport.update({
   id: '/mentor',
   path: '/mentor',
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/browse': typeof AppBrowseRoute
   '/dashboard': typeof AppDashboardRoute
   '/mentor': typeof AppMentorRoute
+  '/profile': typeof AppProfileRoute
   '/subjects/$': typeof SubjectsSplatRoute
   '/subjects/': typeof SubjectsIndexRoute
 }
@@ -88,6 +95,7 @@ export interface FileRoutesByTo {
   '/browse': typeof AppBrowseRoute
   '/dashboard': typeof AppDashboardRoute
   '/mentor': typeof AppMentorRoute
+  '/profile': typeof AppProfileRoute
   '/subjects/$': typeof SubjectsSplatRoute
   '/subjects': typeof SubjectsIndexRoute
 }
@@ -101,6 +109,7 @@ export interface FileRoutesById {
   '/_app/browse': typeof AppBrowseRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/mentor': typeof AppMentorRoute
+  '/_app/profile': typeof AppProfileRoute
   '/subjects/$': typeof SubjectsSplatRoute
   '/subjects/': typeof SubjectsIndexRoute
 }
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/browse'
     | '/dashboard'
     | '/mentor'
+    | '/profile'
     | '/subjects/$'
     | '/subjects/'
   fileRoutesByTo: FileRoutesByTo
@@ -124,6 +134,7 @@ export interface FileRouteTypes {
     | '/browse'
     | '/dashboard'
     | '/mentor'
+    | '/profile'
     | '/subjects/$'
     | '/subjects'
   id:
@@ -136,6 +147,7 @@ export interface FileRouteTypes {
     | '/_app/browse'
     | '/_app/dashboard'
     | '/_app/mentor'
+    | '/_app/profile'
     | '/subjects/$'
     | '/subjects/'
   fileRoutesById: FileRoutesById
@@ -191,6 +203,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SubjectsSplatRouteImport
       parentRoute: typeof SubjectsRoute
     }
+    '/_app/profile': {
+      id: '/_app/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/mentor': {
       id: '/_app/mentor'
       path: '/mentor'
@@ -227,6 +246,7 @@ interface AppRouteChildren {
   AppBrowseRoute: typeof AppBrowseRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppMentorRoute: typeof AppMentorRoute
+  AppProfileRoute: typeof AppProfileRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -234,6 +254,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppBrowseRoute: AppBrowseRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppMentorRoute: AppMentorRoute,
+  AppProfileRoute: AppProfileRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
