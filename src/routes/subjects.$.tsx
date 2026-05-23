@@ -107,6 +107,7 @@ function SubjectPage() {
             <CodeReview subjectPath={path} />
           </div>
         )}
+        {tab === "progress" && <ProgressPanel subjectPath={path} />}
       </div>
     </div>
   );
