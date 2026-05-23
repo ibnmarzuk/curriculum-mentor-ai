@@ -15,7 +15,7 @@ const subjectQuery = (path: string) =>
     staleTime: 60 * 60 * 1000,
   });
 
-export const Route = createFileRoute("/subjects/$")({
+export const Route = createFileRoute("/_app/subjects/$")({
   loader: ({ params, context }) => {
     const path = (params._splat ?? "").replace(/^\/+|\/+$/g, "");
     if (!path) throw notFound();
