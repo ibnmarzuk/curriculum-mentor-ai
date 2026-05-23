@@ -18,6 +18,7 @@ import { Route as SubjectsSplatRouteImport } from './routes/subjects.$'
 import { Route as AppMentorRouteImport } from './routes/_app.mentor'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppBrowseRouteImport } from './routes/_app.browse'
+import { Route as AppAssessmentsRouteImport } from './routes/_app.assessments'
 
 const SubjectsRoute = SubjectsRouteImport.update({
   id: '/subjects',
@@ -63,11 +64,17 @@ const AppBrowseRoute = AppBrowseRouteImport.update({
   path: '/browse',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAssessmentsRoute = AppAssessmentsRouteImport.update({
+  id: '/assessments',
+  path: '/assessments',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/subjects': typeof SubjectsRouteWithChildren
+  '/assessments': typeof AppAssessmentsRoute
   '/browse': typeof AppBrowseRoute
   '/dashboard': typeof AppDashboardRoute
   '/mentor': typeof AppMentorRoute
@@ -77,6 +84,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/assessments': typeof AppAssessmentsRoute
   '/browse': typeof AppBrowseRoute
   '/dashboard': typeof AppDashboardRoute
   '/mentor': typeof AppMentorRoute
@@ -89,6 +97,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/subjects': typeof SubjectsRouteWithChildren
+  '/_app/assessments': typeof AppAssessmentsRoute
   '/_app/browse': typeof AppBrowseRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/mentor': typeof AppMentorRoute
@@ -101,6 +110,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/subjects'
+    | '/assessments'
     | '/browse'
     | '/dashboard'
     | '/mentor'
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/assessments'
     | '/browse'
     | '/dashboard'
     | '/mentor'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '/_app'
     | '/login'
     | '/subjects'
+    | '/_app/assessments'
     | '/_app/browse'
     | '/_app/dashboard'
     | '/_app/mentor'
@@ -200,16 +212,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBrowseRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/assessments': {
+      id: '/_app/assessments'
+      path: '/assessments'
+      fullPath: '/assessments'
+      preLoaderRoute: typeof AppAssessmentsRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
+  AppAssessmentsRoute: typeof AppAssessmentsRoute
   AppBrowseRoute: typeof AppBrowseRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppMentorRoute: typeof AppMentorRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAssessmentsRoute: AppAssessmentsRoute,
   AppBrowseRoute: AppBrowseRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppMentorRoute: AppMentorRoute,
