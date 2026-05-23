@@ -1,5 +1,6 @@
 import { createFileRoute, Link, Outlet, useParams } from "@tanstack/react-router";
 import { SubjectTree } from "@/components/SubjectTree";
+import { AuthButton } from "@/components/AuthButton";
 
 export const Route = createFileRoute("/subjects")({
   head: () => ({
