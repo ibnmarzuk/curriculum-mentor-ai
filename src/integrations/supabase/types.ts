@@ -86,6 +86,48 @@ export type Database = {
         }
         Relationships: []
       }
+      subject_meta: {
+        Row: {
+          ai_classified_at: string | null
+          created_at: string
+          description: string | null
+          difficulty: string | null
+          estimated_minutes: number | null
+          framework: string | null
+          language: string | null
+          subject_path: string
+          tags: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          ai_classified_at?: string | null
+          created_at?: string
+          description?: string | null
+          difficulty?: string | null
+          estimated_minutes?: number | null
+          framework?: string | null
+          language?: string | null
+          subject_path: string
+          tags?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          ai_classified_at?: string | null
+          created_at?: string
+          description?: string | null
+          difficulty?: string | null
+          estimated_minutes?: number | null
+          framework?: string | null
+          language?: string | null
+          subject_path?: string
+          tags?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       subject_progress: {
         Row: {
           completed_steps: string[]
@@ -121,7 +163,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
       [_ in never]: never

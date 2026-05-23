@@ -9,20 +9,23 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SubjectsRouteImport } from './routes/subjects'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as SubjectsIndexRouteImport } from './routes/subjects.index'
-import { Route as SubjectsSplatRouteImport } from './routes/subjects.$'
+import { Route as AppProfileRouteImport } from './routes/_app.profile'
+import { Route as AppMentorRouteImport } from './routes/_app.mentor'
+import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
+import { Route as AppBrowseRouteImport } from './routes/_app.browse'
+import { Route as AppAssessmentsRouteImport } from './routes/_app.assessments'
+import { Route as AppSubjectsSplatRouteImport } from './routes/_app.subjects.$'
 
-const SubjectsRoute = SubjectsRouteImport.update({
-  id: '/subjects',
-  path: '/subjects',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -30,66 +33,123 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SubjectsIndexRoute = SubjectsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => SubjectsRoute,
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppRoute,
 } as any)
-const SubjectsSplatRoute = SubjectsSplatRouteImport.update({
-  id: '/$',
-  path: '/$',
-  getParentRoute: () => SubjectsRoute,
+const AppMentorRoute = AppMentorRouteImport.update({
+  id: '/mentor',
+  path: '/mentor',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBrowseRoute = AppBrowseRouteImport.update({
+  id: '/browse',
+  path: '/browse',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAssessmentsRoute = AppAssessmentsRouteImport.update({
+  id: '/assessments',
+  path: '/assessments',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSubjectsSplatRoute = AppSubjectsSplatRouteImport.update({
+  id: '/subjects/$',
+  path: '/subjects/$',
+  getParentRoute: () => AppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/subjects': typeof SubjectsRouteWithChildren
-  '/subjects/$': typeof SubjectsSplatRoute
-  '/subjects/': typeof SubjectsIndexRoute
+  '/assessments': typeof AppAssessmentsRoute
+  '/browse': typeof AppBrowseRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/mentor': typeof AppMentorRoute
+  '/profile': typeof AppProfileRoute
+  '/subjects/$': typeof AppSubjectsSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/subjects/$': typeof SubjectsSplatRoute
-  '/subjects': typeof SubjectsIndexRoute
+  '/assessments': typeof AppAssessmentsRoute
+  '/browse': typeof AppBrowseRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/mentor': typeof AppMentorRoute
+  '/profile': typeof AppProfileRoute
+  '/subjects/$': typeof AppSubjectsSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
-  '/subjects': typeof SubjectsRouteWithChildren
-  '/subjects/$': typeof SubjectsSplatRoute
-  '/subjects/': typeof SubjectsIndexRoute
+  '/_app/assessments': typeof AppAssessmentsRoute
+  '/_app/browse': typeof AppBrowseRoute
+  '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/mentor': typeof AppMentorRoute
+  '/_app/profile': typeof AppProfileRoute
+  '/_app/subjects/$': typeof AppSubjectsSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/subjects' | '/subjects/$' | '/subjects/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/assessments'
+    | '/browse'
+    | '/dashboard'
+    | '/mentor'
+    | '/profile'
+    | '/subjects/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/subjects/$' | '/subjects'
-  id: '__root__' | '/' | '/login' | '/subjects' | '/subjects/$' | '/subjects/'
+  to:
+    | '/'
+    | '/login'
+    | '/assessments'
+    | '/browse'
+    | '/dashboard'
+    | '/mentor'
+    | '/profile'
+    | '/subjects/$'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/login'
+    | '/_app/assessments'
+    | '/_app/browse'
+    | '/_app/dashboard'
+    | '/_app/mentor'
+    | '/_app/profile'
+    | '/_app/subjects/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
-  SubjectsRoute: typeof SubjectsRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/subjects': {
-      id: '/subjects'
-      path: '/subjects'
-      fullPath: '/subjects'
-      preLoaderRoute: typeof SubjectsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -99,42 +159,86 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/subjects/': {
-      id: '/subjects/'
-      path: '/'
-      fullPath: '/subjects/'
-      preLoaderRoute: typeof SubjectsIndexRouteImport
-      parentRoute: typeof SubjectsRoute
+    '/_app/profile': {
+      id: '/_app/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/subjects/$': {
-      id: '/subjects/$'
-      path: '/$'
+    '/_app/mentor': {
+      id: '/_app/mentor'
+      path: '/mentor'
+      fullPath: '/mentor'
+      preLoaderRoute: typeof AppMentorRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/browse': {
+      id: '/_app/browse'
+      path: '/browse'
+      fullPath: '/browse'
+      preLoaderRoute: typeof AppBrowseRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/assessments': {
+      id: '/_app/assessments'
+      path: '/assessments'
+      fullPath: '/assessments'
+      preLoaderRoute: typeof AppAssessmentsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/subjects/$': {
+      id: '/_app/subjects/$'
+      path: '/subjects/$'
       fullPath: '/subjects/$'
-      preLoaderRoute: typeof SubjectsSplatRouteImport
-      parentRoute: typeof SubjectsRoute
+      preLoaderRoute: typeof AppSubjectsSplatRouteImport
+      parentRoute: typeof AppRoute
     }
   }
 }
 
-interface SubjectsRouteChildren {
-  SubjectsSplatRoute: typeof SubjectsSplatRoute
-  SubjectsIndexRoute: typeof SubjectsIndexRoute
+interface AppRouteChildren {
+  AppAssessmentsRoute: typeof AppAssessmentsRoute
+  AppBrowseRoute: typeof AppBrowseRoute
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppMentorRoute: typeof AppMentorRoute
+  AppProfileRoute: typeof AppProfileRoute
+  AppSubjectsSplatRoute: typeof AppSubjectsSplatRoute
 }
 
-const SubjectsRouteChildren: SubjectsRouteChildren = {
-  SubjectsSplatRoute: SubjectsSplatRoute,
-  SubjectsIndexRoute: SubjectsIndexRoute,
+const AppRouteChildren: AppRouteChildren = {
+  AppAssessmentsRoute: AppAssessmentsRoute,
+  AppBrowseRoute: AppBrowseRoute,
+  AppDashboardRoute: AppDashboardRoute,
+  AppMentorRoute: AppMentorRoute,
+  AppProfileRoute: AppProfileRoute,
+  AppSubjectsSplatRoute: AppSubjectsSplatRoute,
 }
 
-const SubjectsRouteWithChildren = SubjectsRoute._addFileChildren(
-  SubjectsRouteChildren,
-)
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
-  SubjectsRoute: SubjectsRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
