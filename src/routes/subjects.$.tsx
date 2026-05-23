@@ -56,7 +56,7 @@ export const Route = createFileRoute("/subjects/$")({
   ),
 });
 
-type Tab = "brief" | "mentor" | "review";
+type Tab = "brief" | "mentor" | "review" | "progress";
 
 function SubjectPage() {
   const params = Route.useParams();
@@ -68,6 +68,7 @@ function SubjectPage() {
     { id: "brief", label: "Brief" },
     { id: "mentor", label: "Mentor chat" },
     { id: "review", label: "Code review" },
+    { id: "progress", label: "Progress" },
   ];
 
   return (
