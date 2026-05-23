@@ -11,9 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SubjectsRouteImport } from './routes/subjects'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SubjectsIndexRouteImport } from './routes/subjects.index'
 import { Route as SubjectsSplatRouteImport } from './routes/subjects.$'
+import { Route as AppBrowseRouteImport } from './routes/_app.browse'
 
 const SubjectsRoute = SubjectsRouteImport.update({
   id: '/subjects',
@@ -23,6 +25,10 @@ const SubjectsRoute = SubjectsRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -40,38 +46,62 @@ const SubjectsSplatRoute = SubjectsSplatRouteImport.update({
   path: '/$',
   getParentRoute: () => SubjectsRoute,
 } as any)
+const AppBrowseRoute = AppBrowseRouteImport.update({
+  id: '/browse',
+  path: '/browse',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/subjects': typeof SubjectsRouteWithChildren
+  '/browse': typeof AppBrowseRoute
   '/subjects/$': typeof SubjectsSplatRoute
   '/subjects/': typeof SubjectsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/browse': typeof AppBrowseRoute
   '/subjects/$': typeof SubjectsSplatRoute
   '/subjects': typeof SubjectsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/subjects': typeof SubjectsRouteWithChildren
+  '/_app/browse': typeof AppBrowseRoute
   '/subjects/$': typeof SubjectsSplatRoute
   '/subjects/': typeof SubjectsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/subjects' | '/subjects/$' | '/subjects/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/subjects'
+    | '/browse'
+    | '/subjects/$'
+    | '/subjects/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/subjects/$' | '/subjects'
-  id: '__root__' | '/' | '/login' | '/subjects' | '/subjects/$' | '/subjects/'
+  to: '/' | '/login' | '/browse' | '/subjects/$' | '/subjects'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/login'
+    | '/subjects'
+    | '/_app/browse'
+    | '/subjects/$'
+    | '/subjects/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
   SubjectsRoute: typeof SubjectsRouteWithChildren
 }
@@ -90,6 +120,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -113,8 +150,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SubjectsSplatRouteImport
       parentRoute: typeof SubjectsRoute
     }
+    '/_app/browse': {
+      id: '/_app/browse'
+      path: '/browse'
+      fullPath: '/browse'
+      preLoaderRoute: typeof AppBrowseRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
+
+interface AppRouteChildren {
+  AppBrowseRoute: typeof AppBrowseRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppBrowseRoute: AppBrowseRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 interface SubjectsRouteChildren {
   SubjectsSplatRoute: typeof SubjectsSplatRoute
@@ -132,9 +186,20 @@ const SubjectsRouteWithChildren = SubjectsRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
   SubjectsRoute: SubjectsRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
