@@ -6,6 +6,7 @@ import { getSubject } from "@/lib/github.functions";
 import { MarkdownView } from "@/components/MarkdownView";
 import { MentorChat } from "@/components/MentorChat";
 import { CodeReview } from "@/components/CodeReview";
+import { ProgressPanel } from "@/components/ProgressPanel";
 
 const subjectQuery = (path: string) =>
   queryOptions({
