@@ -86,7 +86,12 @@ export function CodeReview({ subjectPath }: { subjectPath: string }) {
           </div>
         )}
         {error && <div className="text-sm text-destructive">{error}</div>}
-        {result && <MarkdownView>{result}</MarkdownView>}
+        {result && (
+          <>
+            {saved && <div className="text-xs text-primary mb-2">✓ Saved to your progress</div>}
+            <MarkdownView>{result}</MarkdownView>
+          </>
+        )}
       </div>
     </div>
   );
