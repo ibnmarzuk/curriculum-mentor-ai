@@ -1,35 +1,53 @@
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Sparkles } from "lucide-react";
 import { reviewCode } from "@/lib/mentor.functions";
+import { saveAttempt } from "@/lib/progress.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { MarkdownView } from "./MarkdownView";
 
 const LANGS = ["auto", "go", "javascript", "typescript", "python", "rust", "java", "c", "sh", "sql", "html", "css"];
 
 export function CodeReview({ subjectPath }: { subjectPath: string }) {
   const fn = useServerFn(reviewCode);
+  const save = useServerFn(saveAttempt);
+  const qc = useQueryClient();
   const [code, setCode] = useState("");
   const [language, setLanguage] = useState("auto");
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
 
   async function run() {
     if (!code.trim() || loading) return;
     setLoading(true);
     setError(null);
     setResult(null);
+    setSaved(false);
     try {
-      const { reply } = await fn({
-        data: { subjectPath, code, language: language === "auto" ? undefined : language },
-      });
+      const lang = language === "auto" ? undefined : language;
+      const { reply } = await fn({ data: { subjectPath, code, language: lang } });
       setResult(reply);
+      // Auto-save attempt if signed in
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        try {
+          await save({ data: { subjectPath, code, language: lang, feedback: reply } });
+          setSaved(true);
+          qc.invalidateQueries({ queryKey: ["progress", subjectPath] });
+        } catch (e) {
+          console.error("Failed to save attempt", e);
+        }
+      }
     } catch (e: any) {
       setError(e?.message ?? "Review failed");
     } finally {
       setLoading(false);
     }
   }
+
 
   return (
     <div className="grid lg:grid-cols-2 gap-6 h-full">
