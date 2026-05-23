@@ -30,7 +30,7 @@ function Landing() {
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/" className="serif italic text-xl">Learn2Earn <span className="text-primary">Mentor</span></Link>
           <nav className="flex items-center gap-6 text-sm">
-            <Link to="/subjects" className="text-muted-foreground hover:text-foreground">Curriculum</Link>
+            <Link to="/browse" className="text-muted-foreground hover:text-foreground">Curriculum</Link>
             <a href="https://github.com/01-edu/public" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground">Repo</a>
           </nav>
         </div>
@@ -47,7 +47,7 @@ function Landing() {
           Chat with an AI mentor grounded in each project's actual requirements. Submit your code and get reviewed against the real spec.
         </p>
         <div className="mt-10 flex flex-wrap gap-3">
-          <Link to="/subjects" className="inline-flex items-center gap-2 bg-primary text-primary-foreground rounded-md px-6 py-3 text-sm font-medium hover:bg-primary/90">
+          <Link to="/browse" className="inline-flex items-center gap-2 bg-primary text-primary-foreground rounded-md px-6 py-3 text-sm font-medium hover:bg-primary/90">
             Open the curriculum <ArrowRight size={16} />
           </Link>
           <a href="#how" className="inline-flex items-center gap-2 border border-border rounded-md px-6 py-3 text-sm font-medium hover:bg-surface-2/60">
@@ -77,7 +77,7 @@ function Landing() {
       <section className="max-w-6xl mx-auto px-6 py-20">
         <div className="flex items-end justify-between mb-10">
           <h2 className="serif text-4xl">Featured tracks</h2>
-          <Link to="/subjects" className="text-sm text-primary hover:underline">browse all →</Link>
+          <Link to="/browse" className="text-sm text-primary hover:underline">browse all →</Link>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-border">
           {TRACKS.map((t) => (
