@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      code_attempts: {
+        Row: {
+          code: string
+          created_at: string
+          feedback: string | null
+          id: string
+          language: string | null
+          subject_path: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          language?: string | null
+          subject_path: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          language?: string | null
+          subject_path?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       github_cache: {
         Row: {
           cache_key: string
@@ -29,6 +59,60 @@ export type Database = {
           cache_key?: string
           content?: string
           fetched_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      subject_progress: {
+        Row: {
+          completed_steps: string[]
+          created_at: string
+          id: string
+          next_tasks: string[]
+          subject_path: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_steps?: string[]
+          created_at?: string
+          id?: string
+          next_tasks?: string[]
+          subject_path: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_steps?: string[]
+          created_at?: string
+          id?: string
+          next_tasks?: string[]
+          subject_path?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
