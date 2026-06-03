@@ -18,6 +18,7 @@ import { Route as AppMentorRouteImport } from './routes/_app.mentor'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppBrowseRouteImport } from './routes/_app.browse'
 import { Route as AppAssessmentsRouteImport } from './routes/_app.assessments'
+import { Route as AppTracksSlugRouteImport } from './routes/_app.tracks.$slug'
 import { Route as AppSubjectsSplatRouteImport } from './routes/_app.subjects.$'
 
 const LoginRoute = LoginRouteImport.update({
@@ -64,6 +65,11 @@ const AppAssessmentsRoute = AppAssessmentsRouteImport.update({
   path: '/assessments',
   getParentRoute: () => AppRoute,
 } as any)
+const AppTracksSlugRoute = AppTracksSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => AppTracksRoute,
+} as any)
 const AppSubjectsSplatRoute = AppSubjectsSplatRouteImport.update({
   id: '/subjects/$',
   path: '/subjects/$',
@@ -78,8 +84,9 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/mentor': typeof AppMentorRoute
   '/profile': typeof AppProfileRoute
-  '/tracks': typeof AppTracksRoute
+  '/tracks': typeof AppTracksRouteWithChildren
   '/subjects/$': typeof AppSubjectsSplatRoute
+  '/tracks/$slug': typeof AppTracksSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -89,8 +96,9 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardRoute
   '/mentor': typeof AppMentorRoute
   '/profile': typeof AppProfileRoute
-  '/tracks': typeof AppTracksRoute
+  '/tracks': typeof AppTracksRouteWithChildren
   '/subjects/$': typeof AppSubjectsSplatRoute
+  '/tracks/$slug': typeof AppTracksSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -102,8 +110,9 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/mentor': typeof AppMentorRoute
   '/_app/profile': typeof AppProfileRoute
-  '/_app/tracks': typeof AppTracksRoute
+  '/_app/tracks': typeof AppTracksRouteWithChildren
   '/_app/subjects/$': typeof AppSubjectsSplatRoute
+  '/_app/tracks/$slug': typeof AppTracksSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -117,6 +126,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/tracks'
     | '/subjects/$'
+    | '/tracks/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/tracks'
     | '/subjects/$'
+    | '/tracks/$slug'
   id:
     | '__root__'
     | '/'
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/_app/profile'
     | '/_app/tracks'
     | '/_app/subjects/$'
+    | '/_app/tracks/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -213,6 +225,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAssessmentsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/tracks/$slug': {
+      id: '/_app/tracks/$slug'
+      path: '/$slug'
+      fullPath: '/tracks/$slug'
+      preLoaderRoute: typeof AppTracksSlugRouteImport
+      parentRoute: typeof AppTracksRoute
+    }
     '/_app/subjects/$': {
       id: '/_app/subjects/$'
       path: '/subjects/$'
@@ -223,13 +242,25 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AppTracksRouteChildren {
+  AppTracksSlugRoute: typeof AppTracksSlugRoute
+}
+
+const AppTracksRouteChildren: AppTracksRouteChildren = {
+  AppTracksSlugRoute: AppTracksSlugRoute,
+}
+
+const AppTracksRouteWithChildren = AppTracksRoute._addFileChildren(
+  AppTracksRouteChildren,
+)
+
 interface AppRouteChildren {
   AppAssessmentsRoute: typeof AppAssessmentsRoute
   AppBrowseRoute: typeof AppBrowseRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppMentorRoute: typeof AppMentorRoute
   AppProfileRoute: typeof AppProfileRoute
-  AppTracksRoute: typeof AppTracksRoute
+  AppTracksRoute: typeof AppTracksRouteWithChildren
   AppSubjectsSplatRoute: typeof AppSubjectsSplatRoute
 }
 
@@ -239,7 +270,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppMentorRoute: AppMentorRoute,
   AppProfileRoute: AppProfileRoute,
-  AppTracksRoute: AppTracksRoute,
+  AppTracksRoute: AppTracksRouteWithChildren,
   AppSubjectsSplatRoute: AppSubjectsSplatRoute,
 }
 
