@@ -93,6 +93,7 @@ function SubjectPage() {
       <div className="flex-1 min-h-0 overflow-hidden">
         {tab === "brief" && (
           <div className="h-full overflow-y-auto px-8 py-8 max-w-4xl">
+            <ReadinessPanel subjectPath={path} />
             {data.markdown ? (
               <MarkdownView>{data.markdown}</MarkdownView>
             ) : (
