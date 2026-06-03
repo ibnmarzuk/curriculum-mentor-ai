@@ -6,6 +6,7 @@ import {
   GraduationCap,
   User,
   BookOpen,
+  Map,
 } from "lucide-react";
 import {
   Sidebar,
@@ -22,11 +23,12 @@ import {
 
 const NAV = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Tracks", url: "/tracks", icon: Map },
   { title: "Browse", url: "/browse", icon: Compass },
   { title: "Mentor", url: "/mentor", icon: MessageSquare },
   { title: "Assessments", url: "/assessments", icon: GraduationCap },
   { title: "Profile", url: "/profile", icon: User },
-];
+] as const;
 
 export function AppSidebar() {
   const { state } = useSidebar();
