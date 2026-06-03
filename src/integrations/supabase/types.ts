@@ -86,6 +86,60 @@ export type Database = {
         }
         Relationships: []
       }
+      readiness_cache: {
+        Row: {
+          computed_at: string
+          missing: string[]
+          score: number
+          subject_path: string
+          user_id: string
+        }
+        Insert: {
+          computed_at?: string
+          missing?: string[]
+          score?: number
+          subject_path: string
+          user_id: string
+        }
+        Update: {
+          computed_at?: string
+          missing?: string[]
+          score?: number
+          subject_path?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      skills: {
+        Row: {
+          created_at: string
+          description: string | null
+          level: string
+          name: string
+          prerequisites: string[]
+          slug: string
+          track: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          level: string
+          name: string
+          prerequisites?: string[]
+          slug: string
+          track: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          level?: string
+          name?: string
+          prerequisites?: string[]
+          slug?: string
+          track?: string
+        }
+        Relationships: []
+      }
       subject_meta: {
         Row: {
           ai_classified_at: string | null
@@ -157,6 +211,132 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      subject_skills: {
+        Row: {
+          created_at: string
+          role: string
+          skill_slug: string
+          subject_path: string
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          role: string
+          skill_slug: string
+          subject_path: string
+          weight?: number
+        }
+        Update: {
+          created_at?: string
+          role?: string
+          skill_slug?: string
+          subject_path?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subject_skills_skill_slug_fkey"
+            columns: ["skill_slug"]
+            isOneToOne: false
+            referencedRelation: "skills"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
+      tracks: {
+        Row: {
+          created_at: string
+          description: string | null
+          level: string
+          name: string
+          skill_slugs: string[]
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          level: string
+          name: string
+          skill_slugs?: string[]
+          slug: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          level?: string
+          name?: string
+          skill_slugs?: string[]
+          slug?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      user_skill_mastery: {
+        Row: {
+          evidence: Json
+          mastery: number
+          skill_slug: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          evidence?: Json
+          mastery?: number
+          skill_slug: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          evidence?: Json
+          mastery?: number
+          skill_slug?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_skill_mastery_skill_slug_fkey"
+            columns: ["skill_slug"]
+            isOneToOne: false
+            referencedRelation: "skills"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
+      user_track_enrollment: {
+        Row: {
+          current_skill_slug: string | null
+          started_at: string
+          track_slug: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          current_skill_slug?: string | null
+          started_at?: string
+          track_slug: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          current_skill_slug?: string | null
+          started_at?: string
+          track_slug?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_track_enrollment_track_slug_fkey"
+            columns: ["track_slug"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["slug"]
+          },
+        ]
       }
     }
     Views: {
