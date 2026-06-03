@@ -7,6 +7,7 @@ import { MarkdownView } from "@/components/MarkdownView";
 import { MentorChat } from "@/components/MentorChat";
 import { CodeReview } from "@/components/CodeReview";
 import { ProgressPanel } from "@/components/ProgressPanel";
+import { ReadinessPanel } from "@/components/ReadinessPanel";
 
 const subjectQuery = (path: string) =>
   queryOptions({
