@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppTracksRouteImport } from './routes/_app.tracks'
 import { Route as AppProfileRouteImport } from './routes/_app.profile'
 import { Route as AppMentorRouteImport } from './routes/_app.mentor'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
@@ -32,6 +33,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppTracksRoute = AppTracksRouteImport.update({
+  id: '/tracks',
+  path: '/tracks',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppProfileRoute = AppProfileRouteImport.update({
   id: '/profile',
@@ -72,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/mentor': typeof AppMentorRoute
   '/profile': typeof AppProfileRoute
+  '/tracks': typeof AppTracksRoute
   '/subjects/$': typeof AppSubjectsSplatRoute
 }
 export interface FileRoutesByTo {
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardRoute
   '/mentor': typeof AppMentorRoute
   '/profile': typeof AppProfileRoute
+  '/tracks': typeof AppTracksRoute
   '/subjects/$': typeof AppSubjectsSplatRoute
 }
 export interface FileRoutesById {
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/mentor': typeof AppMentorRoute
   '/_app/profile': typeof AppProfileRoute
+  '/_app/tracks': typeof AppTracksRoute
   '/_app/subjects/$': typeof AppSubjectsSplatRoute
 }
 export interface FileRouteTypes {
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/mentor'
     | '/profile'
+    | '/tracks'
     | '/subjects/$'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -116,6 +126,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/mentor'
     | '/profile'
+    | '/tracks'
     | '/subjects/$'
   id:
     | '__root__'
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/_app/mentor'
     | '/_app/profile'
+    | '/_app/tracks'
     | '/_app/subjects/$'
   fileRoutesById: FileRoutesById
 }
@@ -158,6 +170,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/tracks': {
+      id: '/_app/tracks'
+      path: '/tracks'
+      fullPath: '/tracks'
+      preLoaderRoute: typeof AppTracksRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/profile': {
       id: '/_app/profile'
@@ -210,6 +229,7 @@ interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppMentorRoute: typeof AppMentorRoute
   AppProfileRoute: typeof AppProfileRoute
+  AppTracksRoute: typeof AppTracksRoute
   AppSubjectsSplatRoute: typeof AppSubjectsSplatRoute
 }
 
@@ -219,6 +239,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppMentorRoute: AppMentorRoute,
   AppProfileRoute: AppProfileRoute,
+  AppTracksRoute: AppTracksRoute,
   AppSubjectsSplatRoute: AppSubjectsSplatRoute,
 }
 
@@ -232,3 +253,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
