@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Compass, MessageSquare, GraduationCap } from "lucide-react";
+import { Compass, MessageSquare, GraduationCap, Map } from "lucide-react";
 
 export const Route = createFileRoute("/_app/dashboard")({
   head: () => ({
