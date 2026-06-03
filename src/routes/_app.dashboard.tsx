@@ -19,8 +19,9 @@ function DashboardPage() {
         <p className="text-sm text-muted-foreground mb-8">
           Streaks, active projects, and recommended next steps are coming in the next slice. For now, jump in:
         </p>
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
+            { to: "/tracks", icon: Map, title: "Learning tracks", desc: "Roadmaps for frontend, backend, AI, DevOps & more." },
             { to: "/browse", icon: Compass, title: "Browse projects", desc: "Search every project in the curriculum." },
             { to: "/mentor", icon: MessageSquare, title: "Talk to the mentor", desc: "Ask anything — grounded in real briefs." },
             { to: "/assessments", icon: GraduationCap, title: "Assessments", desc: "Test what you know (coming soon)." },
