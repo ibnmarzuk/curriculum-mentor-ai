@@ -192,7 +192,7 @@ export const ragMentor = createServerFn({ method: "POST" })
     const { data: matches, error: rpcErr } = await supabaseAdmin.rpc("match_subject_chunks", {
       query_embedding: queryVec as unknown as string,
       match_count: 8,
-      filter_language: data.language ?? null,
+      filter_language: data.language ?? undefined,
     });
     if (rpcErr) throw new Error(rpcErr.message);
 
