@@ -67,6 +67,14 @@ function SubjectPage() {
   const { data } = useSuspenseQuery(subjectQuery(path));
   const [tab, setTab] = useState<Tab>("brief");
 
+  // Fire-and-forget: enrich metadata + index for RAG when a subject opens.
+  // Both are idempotent / skip if already done.
+  useEffect(() => {
+    if (!path) return;
+    classifySubject({ data: { subjectPath: path } }).catch((e) => console.debug("classify skipped:", e?.message));
+    embedSubject({ data: { subjectPath: path } }).catch((e) => console.debug("embed skipped:", e?.message));
+  }, [path]);
+
   const tabs: { id: Tab; label: string }[] = [
     { id: "brief", label: "Brief" },
     { id: "mentor", label: "Mentor chat" },
