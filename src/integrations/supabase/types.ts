@@ -140,6 +140,33 @@ export type Database = {
         }
         Relationships: []
       }
+      subject_chunks: {
+        Row: {
+          chunk_idx: number
+          content: string
+          created_at: string
+          embedding: string
+          id: string
+          subject_path: string
+        }
+        Insert: {
+          chunk_idx: number
+          content: string
+          created_at?: string
+          embedding: string
+          id?: string
+          subject_path: string
+        }
+        Update: {
+          chunk_idx?: number
+          content?: string
+          created_at?: string
+          embedding?: string
+          id?: string
+          subject_path?: string
+        }
+        Relationships: []
+      }
       subject_meta: {
         Row: {
           ai_classified_at: string | null
@@ -343,6 +370,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      match_subject_chunks: {
+        Args: {
+          filter_language?: string
+          match_count?: number
+          query_embedding: string
+        }
+        Returns: {
+          chunk_idx: number
+          content: string
+          similarity: number
+          subject_path: string
+        }[]
+      }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
     }

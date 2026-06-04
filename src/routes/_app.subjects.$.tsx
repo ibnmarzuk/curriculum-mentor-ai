@@ -1,8 +1,10 @@
 import { createFileRoute, notFound, useRouter } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { getSubject } from "@/lib/github.functions";
+import { classifySubject } from "@/lib/subject-meta.functions";
+import { embedSubject } from "@/lib/rag.functions";
 import { MarkdownView } from "@/components/MarkdownView";
 import { MentorChat } from "@/components/MentorChat";
 import { CodeReview } from "@/components/CodeReview";
@@ -64,6 +66,14 @@ function SubjectPage() {
   const path = (params._splat ?? "").replace(/^\/+|\/+$/g, "");
   const { data } = useSuspenseQuery(subjectQuery(path));
   const [tab, setTab] = useState<Tab>("brief");
+
+  // Fire-and-forget: enrich metadata + index for RAG when a subject opens.
+  // Both are idempotent / skip if already done.
+  useEffect(() => {
+    if (!path) return;
+    classifySubject({ data: { subjectPath: path } }).catch((e) => console.debug("classify skipped:", e?.message));
+    embedSubject({ data: { subjectPath: path } }).catch((e) => console.debug("embed skipped:", e?.message));
+  }, [path]);
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "brief", label: "Brief" },
