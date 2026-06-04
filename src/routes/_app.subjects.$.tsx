@@ -10,6 +10,7 @@ import { MentorChat } from "@/components/MentorChat";
 import { CodeReview } from "@/components/CodeReview";
 import { ProgressPanel } from "@/components/ProgressPanel";
 import { ReadinessPanel } from "@/components/ReadinessPanel";
+import { AssessmentPanel } from "@/components/AssessmentPanel";
 
 const subjectQuery = (path: string) =>
   queryOptions({
@@ -59,7 +60,7 @@ export const Route = createFileRoute("/_app/subjects/$")({
   ),
 });
 
-type Tab = "brief" | "mentor" | "review" | "progress";
+type Tab = "brief" | "mentor" | "assessment" | "review" | "progress";
 
 function SubjectPage() {
   const params = Route.useParams();
@@ -78,6 +79,7 @@ function SubjectPage() {
   const tabs: { id: Tab; label: string }[] = [
     { id: "brief", label: "Brief" },
     { id: "mentor", label: "Mentor chat" },
+    { id: "assessment", label: "Assessment" },
     { id: "review", label: "Code review" },
     { id: "progress", label: "Progress" },
   ];
@@ -114,6 +116,7 @@ function SubjectPage() {
           </div>
         )}
         {tab === "mentor" && <MentorChat subjectPath={path} />}
+        {tab === "assessment" && <AssessmentPanel subjectPath={path} />}
         {tab === "review" && (
           <div className="h-full p-6">
             <CodeReview subjectPath={path} />

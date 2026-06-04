@@ -14,6 +14,95 @@ export type Database = {
   }
   public: {
     Tables: {
+      assessment_results: {
+        Row: {
+          assessment_id: string
+          code: string
+          created_at: string
+          criteria: Json
+          feedback: string | null
+          id: string
+          passed: boolean
+          score: number
+          subject_path: string
+          user_id: string
+        }
+        Insert: {
+          assessment_id: string
+          code?: string
+          created_at?: string
+          criteria?: Json
+          feedback?: string | null
+          id?: string
+          passed?: boolean
+          score?: number
+          subject_path: string
+          user_id: string
+        }
+        Update: {
+          assessment_id?: string
+          code?: string
+          created_at?: string
+          criteria?: Json
+          feedback?: string | null
+          id?: string
+          passed?: boolean
+          score?: number
+          subject_path?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_results_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assessments: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          language: string
+          prompt: string
+          rubric: Json
+          starter_code: string
+          subject_path: string
+          teaches_skills: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind?: string
+          language?: string
+          prompt: string
+          rubric?: Json
+          starter_code?: string
+          subject_path: string
+          teaches_skills?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          language?: string
+          prompt?: string
+          rubric?: Json
+          starter_code?: string
+          subject_path?: string
+          teaches_skills?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       code_attempts: {
         Row: {
           code: string
