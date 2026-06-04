@@ -1,8 +1,10 @@
 import { createFileRoute, notFound, useRouter } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { getSubject } from "@/lib/github.functions";
+import { classifySubject } from "@/lib/subject-meta.functions";
+import { embedSubject } from "@/lib/rag.functions";
 import { MarkdownView } from "@/components/MarkdownView";
 import { MentorChat } from "@/components/MentorChat";
 import { CodeReview } from "@/components/CodeReview";
