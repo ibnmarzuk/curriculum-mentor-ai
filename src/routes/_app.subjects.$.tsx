@@ -79,6 +79,7 @@ function SubjectPage() {
   const tabs: { id: Tab; label: string }[] = [
     { id: "brief", label: "Brief" },
     { id: "mentor", label: "Mentor chat" },
+    { id: "assessment", label: "Assessment" },
     { id: "review", label: "Code review" },
     { id: "progress", label: "Progress" },
   ];
