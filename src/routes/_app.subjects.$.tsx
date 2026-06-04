@@ -116,6 +116,7 @@ function SubjectPage() {
           </div>
         )}
         {tab === "mentor" && <MentorChat subjectPath={path} />}
+        {tab === "assessment" && <AssessmentPanel subjectPath={path} />}
         {tab === "review" && (
           <div className="h-full p-6">
             <CodeReview subjectPath={path} />
