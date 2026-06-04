@@ -108,12 +108,6 @@ export const embedMissingSubjects = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const limit = data.limit ?? 10;
-    const { data: subjects, error } = await supabaseAdmin.rpc("match_subject_chunks" as never, {} as never).then(
-      () => ({ data: null as never, error: null }),
-      () => ({ data: null, error: null }),
-    ).catch(() => ({ data: null, error: null }));
-    void subjects;
-    void error;
 
     // Find subjects without chunks
     const { data: rows } = await supabaseAdmin
