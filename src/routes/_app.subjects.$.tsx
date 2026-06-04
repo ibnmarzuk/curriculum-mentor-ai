@@ -10,6 +10,7 @@ import { MentorChat } from "@/components/MentorChat";
 import { CodeReview } from "@/components/CodeReview";
 import { ProgressPanel } from "@/components/ProgressPanel";
 import { ReadinessPanel } from "@/components/ReadinessPanel";
+import { AssessmentPanel } from "@/components/AssessmentPanel";
 
 const subjectQuery = (path: string) =>
   queryOptions({
