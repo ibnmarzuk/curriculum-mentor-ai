@@ -60,7 +60,7 @@ export const Route = createFileRoute("/_app/subjects/$")({
   ),
 });
 
-type Tab = "brief" | "mentor" | "review" | "progress";
+type Tab = "brief" | "mentor" | "assessment" | "review" | "progress";
 
 function SubjectPage() {
   const params = Route.useParams();
