@@ -66,7 +66,7 @@ export const getOrCreateAssessment = createServerFn({ method: "POST" })
           content:
             "You design short technical assessments (10–20 min) for programming students. " +
             "Pick the most appropriate language for the project (javascript/typescript/python/go/rust/c/sh/sql). " +
-            "Write a precise, self-contained task plus a starter code snippet plus a rubric of 3–5 binary checks.",
+            "Return: a precise task, a starter snippet, a rubric of 3–5 binary checks, a `getting_started` block (3–5 numbered steps for how to start), and a complete reference `solution`.",
         },
         {
           role: "user",
@@ -86,6 +86,8 @@ export const getOrCreateAssessment = createServerFn({ method: "POST" })
                 language: { type: "string", enum: ["javascript", "typescript", "python", "go", "rust", "c", "sh", "sql"] },
                 prompt: { type: "string", description: "Markdown task description with explicit acceptance criteria." },
                 starter_code: { type: "string", description: "Starter code snippet the student edits." },
+                getting_started: { type: "string", description: "Markdown — numbered steps (3-5) for how to start." },
+                solution: { type: "string", description: "Complete, idiomatic reference solution code (no commentary)." },
                 rubric: {
                   type: "array",
                   description: "3-5 binary, machine-checkable criteria.",
@@ -101,7 +103,7 @@ export const getOrCreateAssessment = createServerFn({ method: "POST" })
                   },
                 },
               },
-              required: ["title", "language", "prompt", "starter_code", "rubric"],
+              required: ["title", "language", "prompt", "starter_code", "getting_started", "solution", "rubric"],
               additionalProperties: false,
             },
           },
@@ -117,6 +119,8 @@ export const getOrCreateAssessment = createServerFn({ method: "POST" })
       language: string;
       prompt: string;
       starter_code: string;
+      getting_started: string;
+      solution: string;
       rubric: Array<{ id: string; description: string; weight: number }>;
     };
 
@@ -129,6 +133,8 @@ export const getOrCreateAssessment = createServerFn({ method: "POST" })
         language: parsed.language,
         prompt: parsed.prompt,
         starter_code: parsed.starter_code,
+        getting_started: parsed.getting_started,
+        solution: parsed.solution,
         rubric: parsed.rubric,
         teaches_skills: teachesSlugs,
       })
