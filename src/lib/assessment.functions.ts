@@ -174,8 +174,7 @@ export const gradeAssessment = createServerFn({ method: "POST" })
         {
           role: "system",
           content:
-            "You are an automated grader. Given a task, rubric, and student code, return a strict pass/fail per criterion, an overall 0–100 score, and short actionable feedback. " +
-            "Be conservative: only pass a criterion if the code clearly satisfies it.",
+            "You are an automated grader. Given a task, rubric, reference solution, and student code, return a strict pass/fail per criterion, an overall 0–100 score, short actionable feedback, a list of 2–4 specific concrete improvements the student should make next, and a brief comparison between their approach and the reference solution. Be conservative: only pass a criterion if the code clearly satisfies it.",
         },
         {
           role: "user",
@@ -183,6 +182,7 @@ export const gradeAssessment = createServerFn({ method: "POST" })
             `Task:\n${assessment.prompt}\n\n` +
             `Language: ${assessment.language}\n\n` +
             `Rubric:\n${rubric.map((r) => `- ${r.id} (w=${r.weight}): ${r.description}`).join("\n")}\n\n` +
+            (assessment.solution ? `Reference solution:\n\`\`\`${assessment.language}\n${assessment.solution}\n\`\`\`\n\n` : "") +
             `Student code:\n\`\`\`${assessment.language}\n${data.code}\n\`\`\``,
         },
       ],
@@ -208,9 +208,15 @@ export const gradeAssessment = createServerFn({ method: "POST" })
                     additionalProperties: false,
                   },
                 },
-                feedback: { type: "string", description: "Markdown, 3–6 sentences." },
+                feedback: { type: "string", description: "Markdown summary, 3–6 sentences." },
+                improvements: {
+                  type: "array",
+                  description: "2–4 specific things to improve, each a short imperative sentence.",
+                  items: { type: "string" },
+                },
+                comparison: { type: "string", description: "Short markdown comparing student approach vs reference." },
               },
-              required: ["score", "criteria", "feedback"],
+              required: ["score", "criteria", "feedback", "improvements", "comparison"],
               additionalProperties: false,
             },
           },
@@ -225,6 +231,8 @@ export const gradeAssessment = createServerFn({ method: "POST" })
       score: number;
       criteria: Array<{ id: string; passed: boolean; note: string }>;
       feedback: string;
+      improvements: string[];
+      comparison: string;
     };
     const score = Math.max(0, Math.min(100, parsed.score));
     const passed = score >= 70;
