@@ -269,7 +269,16 @@ export const gradeAssessment = createServerFn({ method: "POST" })
         .upsert(rows, { onConflict: "user_id,skill_slug" });
     }
 
-    return { score, passed, feedback: parsed.feedback, criteria: parsed.criteria };
+    return {
+      score,
+      passed,
+      feedback: parsed.feedback,
+      criteria: parsed.criteria,
+      improvements: parsed.improvements ?? [],
+      comparison: parsed.comparison ?? "",
+      solution: (assessment.solution as string | null) ?? "",
+      gettingStarted: (assessment.getting_started as string | null) ?? "",
+    };
   });
 
 // ----------------- My results -----------------
