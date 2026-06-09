@@ -66,7 +66,7 @@ export const getOrCreateAssessment = createServerFn({ method: "POST" })
           content:
             "You design short technical assessments (10–20 min) for programming students. " +
             "Pick the most appropriate language for the project (javascript/typescript/python/go/rust/c/sh/sql). " +
-            "Write a precise, self-contained task plus a starter code snippet plus a rubric of 3–5 binary checks.",
+            "Return: a precise task, a starter snippet, a rubric of 3–5 binary checks, a `getting_started` block (3–5 numbered steps for how to start), and a complete reference `solution`.",
         },
         {
           role: "user",
@@ -86,6 +86,8 @@ export const getOrCreateAssessment = createServerFn({ method: "POST" })
                 language: { type: "string", enum: ["javascript", "typescript", "python", "go", "rust", "c", "sh", "sql"] },
                 prompt: { type: "string", description: "Markdown task description with explicit acceptance criteria." },
                 starter_code: { type: "string", description: "Starter code snippet the student edits." },
+                getting_started: { type: "string", description: "Markdown — numbered steps (3-5) for how to start." },
+                solution: { type: "string", description: "Complete, idiomatic reference solution code (no commentary)." },
                 rubric: {
                   type: "array",
                   description: "3-5 binary, machine-checkable criteria.",
@@ -101,7 +103,7 @@ export const getOrCreateAssessment = createServerFn({ method: "POST" })
                   },
                 },
               },
-              required: ["title", "language", "prompt", "starter_code", "rubric"],
+              required: ["title", "language", "prompt", "starter_code", "getting_started", "solution", "rubric"],
               additionalProperties: false,
             },
           },
@@ -117,6 +119,8 @@ export const getOrCreateAssessment = createServerFn({ method: "POST" })
       language: string;
       prompt: string;
       starter_code: string;
+      getting_started: string;
+      solution: string;
       rubric: Array<{ id: string; description: string; weight: number }>;
     };
 
@@ -129,6 +133,8 @@ export const getOrCreateAssessment = createServerFn({ method: "POST" })
         language: parsed.language,
         prompt: parsed.prompt,
         starter_code: parsed.starter_code,
+        getting_started: parsed.getting_started,
+        solution: parsed.solution,
         rubric: parsed.rubric,
         teaches_skills: teachesSlugs,
       })
@@ -168,8 +174,7 @@ export const gradeAssessment = createServerFn({ method: "POST" })
         {
           role: "system",
           content:
-            "You are an automated grader. Given a task, rubric, and student code, return a strict pass/fail per criterion, an overall 0–100 score, and short actionable feedback. " +
-            "Be conservative: only pass a criterion if the code clearly satisfies it.",
+            "You are an automated grader. Given a task, rubric, reference solution, and student code, return a strict pass/fail per criterion, an overall 0–100 score, short actionable feedback, a list of 2–4 specific concrete improvements the student should make next, and a brief comparison between their approach and the reference solution. Be conservative: only pass a criterion if the code clearly satisfies it.",
         },
         {
           role: "user",
@@ -177,6 +182,7 @@ export const gradeAssessment = createServerFn({ method: "POST" })
             `Task:\n${assessment.prompt}\n\n` +
             `Language: ${assessment.language}\n\n` +
             `Rubric:\n${rubric.map((r) => `- ${r.id} (w=${r.weight}): ${r.description}`).join("\n")}\n\n` +
+            (assessment.solution ? `Reference solution:\n\`\`\`${assessment.language}\n${assessment.solution}\n\`\`\`\n\n` : "") +
             `Student code:\n\`\`\`${assessment.language}\n${data.code}\n\`\`\``,
         },
       ],
@@ -202,9 +208,15 @@ export const gradeAssessment = createServerFn({ method: "POST" })
                     additionalProperties: false,
                   },
                 },
-                feedback: { type: "string", description: "Markdown, 3–6 sentences." },
+                feedback: { type: "string", description: "Markdown summary, 3–6 sentences." },
+                improvements: {
+                  type: "array",
+                  description: "2–4 specific things to improve, each a short imperative sentence.",
+                  items: { type: "string" },
+                },
+                comparison: { type: "string", description: "Short markdown comparing student approach vs reference." },
               },
-              required: ["score", "criteria", "feedback"],
+              required: ["score", "criteria", "feedback", "improvements", "comparison"],
               additionalProperties: false,
             },
           },
@@ -219,6 +231,8 @@ export const gradeAssessment = createServerFn({ method: "POST" })
       score: number;
       criteria: Array<{ id: string; passed: boolean; note: string }>;
       feedback: string;
+      improvements: string[];
+      comparison: string;
     };
     const score = Math.max(0, Math.min(100, parsed.score));
     const passed = score >= 70;
@@ -255,7 +269,16 @@ export const gradeAssessment = createServerFn({ method: "POST" })
         .upsert(rows, { onConflict: "user_id,skill_slug" });
     }
 
-    return { score, passed, feedback: parsed.feedback, criteria: parsed.criteria };
+    return {
+      score,
+      passed,
+      feedback: parsed.feedback,
+      criteria: parsed.criteria,
+      improvements: parsed.improvements ?? [],
+      comparison: parsed.comparison ?? "",
+      solution: (assessment.solution as string | null) ?? "",
+      gettingStarted: (assessment.getting_started as string | null) ?? "",
+    };
   });
 
 // ----------------- My results -----------------

@@ -64,11 +64,13 @@ export type Database = {
       assessments: {
         Row: {
           created_at: string
+          getting_started: string | null
           id: string
           kind: string
           language: string
           prompt: string
           rubric: Json
+          solution: string | null
           starter_code: string
           subject_path: string
           teaches_skills: string[]
@@ -77,11 +79,13 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          getting_started?: string | null
           id?: string
           kind?: string
           language?: string
           prompt: string
           rubric?: Json
+          solution?: string | null
           starter_code?: string
           subject_path: string
           teaches_skills?: string[]
@@ -90,11 +94,13 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          getting_started?: string | null
           id?: string
           kind?: string
           language?: string
           prompt?: string
           rubric?: Json
+          solution?: string | null
           starter_code?: string
           subject_path?: string
           teaches_skills?: string[]
@@ -148,6 +154,33 @@ export type Database = {
           cache_key?: string
           content?: string
           fetched_at?: string
+        }
+        Relationships: []
+      }
+      mentor_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+          subject_path: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+          subject_path: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          subject_path?: string
+          user_id?: string
         }
         Relationships: []
       }
