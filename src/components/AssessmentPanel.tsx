@@ -68,6 +68,13 @@ export function AssessmentPanel({ subjectPath }: { subjectPath: string }) {
         <h2 className="serif text-2xl mb-3">{assessment.title}</h2>
         <MarkdownView>{assessment.prompt}</MarkdownView>
 
+        {assessment.getting_started && (
+          <div className="mt-6 border border-border rounded-md p-4 bg-surface/40">
+            <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">How to start</div>
+            <MarkdownView>{assessment.getting_started}</MarkdownView>
+          </div>
+        )}
+
         <div className="mt-6">
           <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Rubric</div>
           <ul className="space-y-1.5">
@@ -91,14 +98,39 @@ export function AssessmentPanel({ subjectPath }: { subjectPath: string }) {
         </div>
 
         {result && (
-          <div className="mt-6 border border-border rounded-md p-4 bg-surface/40">
-            <div className="flex items-center gap-3 mb-2">
-              <div className={`serif text-3xl ${result.passed ? "text-primary" : "text-destructive"}`}>{Math.round(result.score)}</div>
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">
-                {result.passed ? "Passed · mastery updated" : "Not yet — keep iterating"}
+          <div className="mt-6 space-y-4">
+            <div className="border border-border rounded-md p-4 bg-surface/40">
+              <div className="flex items-center gap-3 mb-2">
+                <div className={`serif text-3xl ${result.passed ? "text-primary" : "text-destructive"}`}>{Math.round(result.score)}</div>
+                <div className="text-xs uppercase tracking-wider text-muted-foreground">
+                  {result.passed ? "Passed · mastery updated" : "Not yet — keep iterating"}
+                </div>
               </div>
+              <MarkdownView>{result.feedback}</MarkdownView>
             </div>
-            <MarkdownView>{result.feedback}</MarkdownView>
+
+            {result.improvements?.length > 0 && (
+              <div className="border border-border rounded-md p-4">
+                <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Where to improve</div>
+                <ul className="space-y-1.5 text-sm list-disc pl-5">
+                  {result.improvements.map((imp, i) => <li key={i}>{imp}</li>)}
+                </ul>
+              </div>
+            )}
+
+            {result.comparison && (
+              <div className="border border-border rounded-md p-4">
+                <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Your approach vs reference</div>
+                <MarkdownView>{result.comparison}</MarkdownView>
+              </div>
+            )}
+
+            {result.solution && (
+              <details className="border border-border rounded-md p-4">
+                <summary className="text-xs uppercase tracking-wider text-muted-foreground cursor-pointer">Reference solution</summary>
+                <pre className="mt-3 text-xs bg-surface-2/60 p-3 rounded overflow-x-auto"><code>{result.solution}</code></pre>
+              </details>
+            )}
           </div>
         )}
       </div>
