@@ -54,13 +54,15 @@ const messageSchema = z.object({
 });
 
 export const mentorChat = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d: { subjectPath: string; messages: Array<{ role: "user" | "assistant"; content: string }> }) =>
     z.object({
       subjectPath: z.string().min(1).max(500),
       messages: z.array(messageSchema).min(1).max(40),
     }).parse(d),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
     const brief = await loadSubjectMarkdown(data.subjectPath);
     const system = `You are a senior software engineering mentor for the 01-edu / Learn2Earn curriculum.
 You are teaching a student working on the project at: subjects/${data.subjectPath}
@@ -70,18 +72,63 @@ PROJECT BRIEF (verbatim from the repository — this is your ONLY source of trut
 ${brief || "(README not available — be honest about it.)"}
 ---
 
-Your rules:
-- Ground every answer in the brief above. If the student asks about a requirement, quote it.
-- Give HINTS and guiding questions, not full solutions. Lead the student to discover the answer.
-- Break big asks into small steps. Use analogies when concepts are abstract.
-- If they ask about something not in the brief, say so plainly — do NOT invent requirements.
-- Be warm, direct, and concise. Use markdown. Use code blocks for short examples only.`;
+YOUR TEACHING METHOD — follow this strictly:
+1. On the FIRST message of a conversation, do NOT jump into solutions. Instead:
+   a) Briefly explain the CORE CONCEPT this project is teaching (2–4 short paragraphs, use analogies).
+   b) Outline the key sub-skills the student will exercise.
+   c) Then ASK 2–3 short check-for-understanding QUESTIONS before moving on. Wait for the student's answer.
+2. After the student answers, gently correct any misconceptions and CONFIRM understanding before discussing the implementation.
+3. Only after the student demonstrates conceptual grasp may you discuss approach, structure, and hints.
+4. Always give HINTS and guiding questions, never full solutions. Lead the student to discover the answer.
+5. If they ask about something not in the brief, say so plainly — do NOT invent requirements.
+6. Be warm, direct, and concise. Use markdown. Code blocks for short examples only.`;
 
     const reply = await callGateway([
       { role: "system", content: system },
       ...data.messages,
     ]);
+
+    // Persist the latest user message + assistant reply for this user/subject.
+    const lastUser = [...data.messages].reverse().find((m) => m.role === "user");
+    const rows: Array<{ user_id: string; subject_path: string; role: "user" | "assistant"; content: string }> = [];
+    if (lastUser) rows.push({ user_id: userId, subject_path: data.subjectPath, role: "user", content: lastUser.content });
+    rows.push({ user_id: userId, subject_path: data.subjectPath, role: "assistant", content: reply });
+    await supabase.from("mentor_messages").insert(rows);
+
     return { reply };
+  });
+
+export const getMentorHistory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { subjectPath: string }) =>
+    z.object({ subjectPath: z.string().min(1).max(500) }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: rows, error } = await supabase
+      .from("mentor_messages")
+      .select("role, content, created_at")
+      .eq("user_id", userId)
+      .eq("subject_path", data.subjectPath)
+      .order("created_at", { ascending: true })
+      .limit(200);
+    if (error) throw new Error(error.message);
+    return { messages: rows ?? [] };
+  });
+
+export const clearMentorHistory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { subjectPath: string }) =>
+    z.object({ subjectPath: z.string().min(1).max(500) }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    await supabase
+      .from("mentor_messages")
+      .delete()
+      .eq("user_id", userId)
+      .eq("subject_path", data.subjectPath);
+    return { ok: true };
   });
 
 export const reviewCode = createServerFn({ method: "POST" })
