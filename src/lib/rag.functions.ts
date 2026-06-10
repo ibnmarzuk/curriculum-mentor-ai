@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1";
@@ -69,6 +70,7 @@ async function loadReadme(path: string): Promise<string> {
 
 /** Embed a single subject's README into subject_chunks. Idempotent: deletes existing rows first. */
 export const embedSubject = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d: { subjectPath: string; force?: boolean }) =>
     z.object({ subjectPath: z.string().min(1).max(500), force: z.boolean().optional() }).parse(d),
   )
@@ -103,6 +105,7 @@ export const embedSubject = createServerFn({ method: "POST" })
 
 /** Backfill embeddings for the next N subjects that have no chunks yet. */
 export const embedMissingSubjects = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d: { limit?: number }) =>
     z.object({ limit: z.number().int().min(1).max(50).optional() }).parse(d),
   )
@@ -151,7 +154,9 @@ export const embedMissingSubjects = createServerFn({ method: "POST" })
     return { processed, failed, remaining: Math.max(0, todo.length - processed) };
   });
 
-export const getRagStatus = createServerFn({ method: "GET" }).handler(async () => {
+export const getRagStatus = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
   const [{ count: totalSubjects }, { data: embedded }] = await Promise.all([
     supabaseAdmin.from("subject_meta").select("subject_path", { count: "exact", head: true }),
     supabaseAdmin.from("subject_chunks").select("subject_path"),

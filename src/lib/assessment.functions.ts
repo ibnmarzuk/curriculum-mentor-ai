@@ -36,7 +36,14 @@ async function callAI(body: unknown) {
 
 // ----------------- Get or generate the assessment -----------------
 
+function stripSensitive<T extends Record<string, unknown>>(row: T) {
+  // Never return reference answers to the client; gradeAssessment returns solution after grading.
+  const { solution: _solution, ...safe } = row as T & { solution?: unknown };
+  return safe;
+}
+
 export const getOrCreateAssessment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d: { subjectPath: string }) =>
     z.object({ subjectPath: z.string().min(1).max(500) }).parse(d),
   )
@@ -46,7 +53,7 @@ export const getOrCreateAssessment = createServerFn({ method: "POST" })
       .select("*")
       .eq("subject_path", data.subjectPath)
       .maybeSingle();
-    if (existing) return { assessment: existing };
+    if (existing) return { assessment: stripSensitive(existing) };
 
     const brief = (await loadReadme(data.subjectPath)).slice(0, 6000);
     if (!brief) throw new Error("No project brief available to generate an assessment.");
@@ -141,7 +148,7 @@ export const getOrCreateAssessment = createServerFn({ method: "POST" })
       .select("*")
       .single();
     if (error) throw new Error(error.message);
-    return { assessment: inserted };
+    return { assessment: stripSensitive(inserted) };
   });
 
 // ----------------- Grade an attempt -----------------
