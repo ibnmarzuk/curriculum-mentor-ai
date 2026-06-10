@@ -90,8 +90,16 @@ export function MentorChat({ subjectPath }: { subjectPath: string }) {
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between px-6 py-2 border-b border-border shrink-0">
-        <div className="text-xs text-muted-foreground">
-          {authed ? "Chat history is saved to your profile." : "Sign in to save your conversation."}
+        <div className="text-xs text-muted-foreground flex items-center gap-3">
+          <span>{authed ? "Continuous mentor — full history saved." : "Sign in to save your conversation."}</span>
+          {history.data?.summary && (
+            <span
+              title={history.data.summary.summary}
+              className="font-mono text-[10px] uppercase text-primary/70 border border-primary/30 rounded px-1.5 py-0.5"
+            >
+              🧠 memory · {history.data.summary.message_count} msgs compressed
+            </span>
+          )}
         </div>
         {authed && messages.length > 0 && (
           <button
