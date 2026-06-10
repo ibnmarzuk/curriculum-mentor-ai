@@ -162,6 +162,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          metadata: Json
           role: string
           subject_path: string
           user_id: string
@@ -170,6 +171,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          metadata?: Json
           role: string
           subject_path: string
           user_id: string
@@ -178,8 +180,39 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          metadata?: Json
           role?: string
           subject_path?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mentor_summaries: {
+        Row: {
+          covers_until: string
+          created_at: string
+          id: string
+          message_count: number
+          subject_path: string
+          summary: string
+          user_id: string
+        }
+        Insert: {
+          covers_until: string
+          created_at?: string
+          id?: string
+          message_count?: number
+          subject_path: string
+          summary: string
+          user_id: string
+        }
+        Update: {
+          covers_until?: string
+          created_at?: string
+          id?: string
+          message_count?: number
+          subject_path?: string
+          summary?: string
           user_id?: string
         }
         Relationships: []

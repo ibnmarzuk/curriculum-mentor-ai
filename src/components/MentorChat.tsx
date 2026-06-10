@@ -6,7 +6,67 @@ import { mentorChat, getMentorHistory, clearMentorHistory } from "@/lib/mentor.f
 import { supabase } from "@/integrations/supabase/client";
 import { MarkdownView } from "./MarkdownView";
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Rubric = {
+  questions: Array<{ id: string; text: string; skills: string[] }>;
+  feedback: Array<{ id: string; verdict: string; skillsTested: string[]; skillsMissed: string[] }>;
+};
+type Msg = { role: "user" | "assistant"; content: string; metadata?: { rubric?: Rubric } | null };
+
+function RubricView({ rubric }: { rubric: Rubric }) {
+  const hasQ = rubric.questions.length > 0;
+  const hasF = rubric.feedback.length > 0;
+  if (!hasQ && !hasF) return null;
+  return (
+    <div className="mt-3 border border-border/60 rounded-md p-3 bg-surface-2/30 space-y-2">
+      <div className="text-[10px] uppercase font-mono text-muted-foreground">Skill rubric</div>
+      {hasQ && (
+        <div className="space-y-1">
+          {rubric.questions.map((q) => (
+            <div key={q.id} className="flex items-center gap-2 flex-wrap text-xs">
+              <span className="font-mono text-primary">{q.id}</span>
+              <span className="text-muted-foreground">tests</span>
+              {q.skills.length === 0 ? (
+                <span className="text-muted-foreground italic">— no mapped skills</span>
+              ) : (
+                q.skills.map((s) => (
+                  <span key={s} className="font-mono text-[10px] border border-border rounded px-1.5 py-0.5">
+                    {s}
+                  </span>
+                ))
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+      {hasF && (
+        <div className="space-y-1 pt-2 border-t border-border/40">
+          {rubric.feedback.map((f) => {
+            const missed = new Set(f.skillsMissed);
+            return (
+              <div key={f.id} className="flex items-center gap-2 flex-wrap text-xs">
+                <span className="font-mono text-primary">{f.id}</span>
+                <span className="text-muted-foreground">{f.verdict}</span>
+                {f.skillsTested.map((s) => (
+                  <span
+                    key={s}
+                    className={`font-mono text-[10px] border rounded px-1.5 py-0.5 ${
+                      missed.has(s)
+                        ? "border-destructive/60 text-destructive bg-destructive/10"
+                        : "border-emerald-500/40 text-emerald-500"
+                    }`}
+                  >
+                    {missed.has(s) ? "✗ " : "✓ "}
+                    {s}
+                  </span>
+                ))}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function MentorChat({ subjectPath }: { subjectPath: string }) {
   const fn = useServerFn(mentorChat);
@@ -37,7 +97,13 @@ export function MentorChat({ subjectPath }: { subjectPath: string }) {
   // Hydrate from saved history when subject or auth changes.
   useEffect(() => {
     if (history.data?.messages) {
-      setMessages(history.data.messages.map((m) => ({ role: m.role as "user" | "assistant", content: m.content })));
+      setMessages(
+        history.data.messages.map((m: any) => ({
+          role: m.role as "user" | "assistant",
+          content: m.content,
+          metadata: m.metadata ?? null,
+        })),
+      );
     } else if (authed === false) {
       setMessages([]);
     }
@@ -57,8 +123,11 @@ export function MentorChat({ subjectPath }: { subjectPath: string }) {
     setMessages(next);
     setLoading(true);
     try {
-      const { reply } = await fn({ data: { subjectPath, messages: next } });
-      setMessages([...next, { role: "assistant", content: reply }]);
+      const res = (await fn({ data: { subjectPath, messages: next.map((m) => ({ role: m.role, content: m.content })) } })) as {
+        reply: string;
+        rubric?: Rubric;
+      };
+      setMessages([...next, { role: "assistant", content: res.reply, metadata: { rubric: res.rubric } }]);
       qc.invalidateQueries({ queryKey: ["mentor-history", subjectPath] });
     } catch (e: any) {
       setError(e?.message ?? "Something went wrong");
@@ -77,8 +146,16 @@ export function MentorChat({ subjectPath }: { subjectPath: string }) {
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between px-6 py-2 border-b border-border shrink-0">
-        <div className="text-xs text-muted-foreground">
-          {authed ? "Chat history is saved to your profile." : "Sign in to save your conversation."}
+        <div className="text-xs text-muted-foreground flex items-center gap-3">
+          <span>{authed ? "Continuous mentor — full history saved." : "Sign in to save your conversation."}</span>
+          {history.data?.summary && (
+            <span
+              title={history.data.summary.summary}
+              className="font-mono text-[10px] uppercase text-primary/70 border border-primary/30 rounded px-1.5 py-0.5"
+            >
+              🧠 memory · {history.data.summary.message_count} msgs compressed
+            </span>
+          )}
         </div>
         {authed && messages.length > 0 && (
           <button
@@ -123,6 +200,7 @@ export function MentorChat({ subjectPath }: { subjectPath: string }) {
               <div>
                 <div className="serif italic text-primary/80 text-sm mb-1">Mentor</div>
                 <MarkdownView>{m.content}</MarkdownView>
+                {m.metadata?.rubric && <RubricView rubric={m.metadata.rubric} />}
               </div>
             )}
           </div>
