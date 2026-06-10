@@ -12,6 +12,62 @@ type Rubric = {
 };
 type Msg = { role: "user" | "assistant"; content: string; metadata?: { rubric?: Rubric } | null };
 
+function RubricView({ rubric }: { rubric: Rubric }) {
+  const hasQ = rubric.questions.length > 0;
+  const hasF = rubric.feedback.length > 0;
+  if (!hasQ && !hasF) return null;
+  return (
+    <div className="mt-3 border border-border/60 rounded-md p-3 bg-surface-2/30 space-y-2">
+      <div className="text-[10px] uppercase font-mono text-muted-foreground">Skill rubric</div>
+      {hasQ && (
+        <div className="space-y-1">
+          {rubric.questions.map((q) => (
+            <div key={q.id} className="flex items-center gap-2 flex-wrap text-xs">
+              <span className="font-mono text-primary">{q.id}</span>
+              <span className="text-muted-foreground">tests</span>
+              {q.skills.length === 0 ? (
+                <span className="text-muted-foreground italic">— no mapped skills</span>
+              ) : (
+                q.skills.map((s) => (
+                  <span key={s} className="font-mono text-[10px] border border-border rounded px-1.5 py-0.5">
+                    {s}
+                  </span>
+                ))
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+      {hasF && (
+        <div className="space-y-1 pt-2 border-t border-border/40">
+          {rubric.feedback.map((f) => {
+            const missed = new Set(f.skillsMissed);
+            return (
+              <div key={f.id} className="flex items-center gap-2 flex-wrap text-xs">
+                <span className="font-mono text-primary">{f.id}</span>
+                <span className="text-muted-foreground">{f.verdict}</span>
+                {f.skillsTested.map((s) => (
+                  <span
+                    key={s}
+                    className={`font-mono text-[10px] border rounded px-1.5 py-0.5 ${
+                      missed.has(s)
+                        ? "border-destructive/60 text-destructive bg-destructive/10"
+                        : "border-emerald-500/40 text-emerald-500"
+                    }`}
+                  >
+                    {missed.has(s) ? "✗ " : "✓ "}
+                    {s}
+                  </span>
+                ))}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function MentorChat({ subjectPath }: { subjectPath: string }) {
   const fn = useServerFn(mentorChat);
   const histFn = useServerFn(getMentorHistory);
