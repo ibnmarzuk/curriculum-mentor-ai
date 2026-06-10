@@ -144,6 +144,7 @@ export function MentorChat({ subjectPath }: { subjectPath: string }) {
               <div>
                 <div className="serif italic text-primary/80 text-sm mb-1">Mentor</div>
                 <MarkdownView>{m.content}</MarkdownView>
+                {m.metadata?.rubric && <RubricView rubric={m.metadata.rubric} />}
               </div>
             )}
           </div>
