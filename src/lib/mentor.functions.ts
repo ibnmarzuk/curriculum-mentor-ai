@@ -306,7 +306,7 @@ export const mentorChat = createServerFn({ method: "POST" })
       subject_path: string;
       role: "user" | "assistant";
       content: string;
-      metadata: Record<string, unknown>;
+      metadata: any;
     }> = [];
     if (lastUser) {
       rows.push({
@@ -322,9 +322,9 @@ export const mentorChat = createServerFn({ method: "POST" })
       subject_path: data.subjectPath,
       role: "assistant",
       content: reply,
-      metadata: { rubric },
+      metadata: { rubric } as any,
     });
-    await supabase.from("mentor_messages").insert(rows);
+    await supabase.from("mentor_messages").insert(rows as any);
 
     // Fire-and-forget summarization
     maybeSummarize(supabase, userId, data.subjectPath).catch((e) => console.error(e));
