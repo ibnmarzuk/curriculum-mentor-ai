@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const REPO = "01-edu/public";
 const BRANCH = "master";
@@ -57,7 +58,9 @@ function deriveLanguage(path: string): string | null {
 
 /** Walks the entire repo via the GitHub Git Trees API and upserts one
  * subject_meta row for every directory containing a README.md. */
-export const indexAllSubjects = createServerFn({ method: "POST" }).handler(async () => {
+export const indexAllSubjects = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
   const url = `https://api.github.com/repos/${REPO}/git/trees/${BRANCH}?recursive=1`;
   const res = await fetch(url, {
     headers: { Accept: "application/vnd.github+json", "User-Agent": "lovable-mentor" },
@@ -123,6 +126,7 @@ async function loadReadme(path: string): Promise<string> {
 }
 
 export const classifySubject = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d: { subjectPath: string }) =>
     z.object({ subjectPath: z.string().min(1).max(500) }).parse(d),
   )

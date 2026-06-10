@@ -168,6 +168,7 @@ async function loadReadme(path: string): Promise<string> {
 }
 
 export const extractSubjectSkills = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d: { subjectPath: string }) =>
     z.object({ subjectPath: z.string().min(1).max(500) }).parse(d),
   )
