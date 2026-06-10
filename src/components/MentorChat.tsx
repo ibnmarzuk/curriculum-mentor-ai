@@ -41,7 +41,13 @@ export function MentorChat({ subjectPath }: { subjectPath: string }) {
   // Hydrate from saved history when subject or auth changes.
   useEffect(() => {
     if (history.data?.messages) {
-      setMessages(history.data.messages.map((m) => ({ role: m.role as "user" | "assistant", content: m.content })));
+      setMessages(
+        history.data.messages.map((m: any) => ({
+          role: m.role as "user" | "assistant",
+          content: m.content,
+          metadata: m.metadata ?? null,
+        })),
+      );
     } else if (authed === false) {
       setMessages([]);
     }
@@ -61,8 +67,11 @@ export function MentorChat({ subjectPath }: { subjectPath: string }) {
     setMessages(next);
     setLoading(true);
     try {
-      const { reply } = await fn({ data: { subjectPath, messages: next } });
-      setMessages([...next, { role: "assistant", content: reply }]);
+      const res = (await fn({ data: { subjectPath, messages: next.map((m) => ({ role: m.role, content: m.content })) } })) as {
+        reply: string;
+        rubric?: Rubric;
+      };
+      setMessages([...next, { role: "assistant", content: res.reply, metadata: { rubric: res.rubric } }]);
       qc.invalidateQueries({ queryKey: ["mentor-history", subjectPath] });
     } catch (e: any) {
       setError(e?.message ?? "Something went wrong");
