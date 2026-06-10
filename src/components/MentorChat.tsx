@@ -6,7 +6,11 @@ import { mentorChat, getMentorHistory, clearMentorHistory } from "@/lib/mentor.f
 import { supabase } from "@/integrations/supabase/client";
 import { MarkdownView } from "./MarkdownView";
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Rubric = {
+  questions: Array<{ id: string; text: string; skills: string[] }>;
+  feedback: Array<{ id: string; verdict: string; skillsTested: string[]; skillsMissed: string[] }>;
+};
+type Msg = { role: "user" | "assistant"; content: string; metadata?: { rubric?: Rubric } | null };
 
 export function MentorChat({ subjectPath }: { subjectPath: string }) {
   const fn = useServerFn(mentorChat);
