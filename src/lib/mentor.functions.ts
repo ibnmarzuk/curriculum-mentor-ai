@@ -276,7 +276,9 @@ export const mentorChat = createServerFn({ method: "POST" })
   .inputValidator((d: { subjectPath: string; messages: Array<{ role: "user" | "assistant"; content: string }> }) =>
     z.object({
       subjectPath: z.string().min(1).max(500),
-      messages: z.array(messageSchema).min(1).max(40),
+      // Accept long histories; we trim server-side. Long-term memory lives in summaries.
+      messages: z.array(messageSchema).min(1).max(500)
+        .transform((arr) => arr.slice(-RECENT_WINDOW)),
     }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -288,7 +290,6 @@ export const mentorChat = createServerFn({ method: "POST" })
 
     const system = buildSystemPrompt(data.subjectPath, brief, mem);
 
-    // Use only the last RECENT_WINDOW client messages to keep tokens bounded — long-term memory lives in the summary.
     const trimmed = data.messages.slice(-RECENT_WINDOW);
 
     const reply = await callGateway([
