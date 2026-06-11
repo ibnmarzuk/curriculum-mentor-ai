@@ -53,9 +53,14 @@ async function callGateway(messages: Array<{ role: string; content: string }>) {
   return json.choices[0]?.message?.content ?? "";
 }
 
+const MAX_CONTENT_CHARS = 24000;
 const messageSchema = z.object({
   role: z.enum(["user", "assistant"]),
-  content: z.string().min(1).max(8000),
+  content: z
+    .string()
+    .min(1)
+    .max(200000)
+    .transform((s) => (s.length > MAX_CONTENT_CHARS ? s.slice(0, MAX_CONTENT_CHARS) : s)),
 });
 
 type MemoryContext = {
