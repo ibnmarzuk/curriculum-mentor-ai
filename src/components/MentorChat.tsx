@@ -123,7 +123,7 @@ export function MentorChat({ subjectPath }: { subjectPath: string }) {
     setMessages(next);
     setLoading(true);
     try {
-      const res = (await fn({ data: { subjectPath, messages: next.map((m) => ({ role: m.role, content: m.content })) } })) as {
+      const res = (await fn({ data: { subjectPath, messages: next.slice(-20).map((m) => ({ role: m.role, content: m.content })) } })) as {
         reply: string;
         rubric?: Rubric;
       };
