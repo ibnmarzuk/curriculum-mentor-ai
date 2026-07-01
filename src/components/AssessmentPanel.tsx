@@ -2,8 +2,13 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import Editor from "@monaco-editor/react";
-import { Loader2, Sparkles, Play, Check, X } from "lucide-react";
-import { getOrCreateAssessment, gradeAssessment } from "@/lib/assessment.functions";
+import { Loader2, Play, Check, X, Lightbulb } from "lucide-react";
+import {
+  getOrCreateAssessment,
+  gradeAssessment,
+  listAssessmentAttempts,
+  getHint,
+} from "@/lib/assessment.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { MarkdownView } from "./MarkdownView";
 
