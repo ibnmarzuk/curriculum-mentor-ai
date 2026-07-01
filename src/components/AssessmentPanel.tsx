@@ -42,8 +42,29 @@ export function AssessmentPanel({ subjectPath }: { subjectPath: string }) {
       qc.invalidateQueries({ queryKey: ["readiness", subjectPath] });
       qc.invalidateQueries({ queryKey: ["recommendation", subjectPath] });
       qc.invalidateQueries({ queryKey: ["my-assessment-results"] });
+      qc.invalidateQueries({ queryKey: ["attempts", aq.data?.assessment.id] });
     },
   });
+
+  const attemptsFn = useServerFn(listAssessmentAttempts);
+  const attemptsQ = useQuery({
+    queryKey: ["attempts", aq.data?.assessment?.id],
+    queryFn: () => attemptsFn({ data: { assessmentId: aq.data!.assessment.id } }),
+    enabled: authed === true && !!aq.data?.assessment?.id,
+  });
+
+  const hintFn = useServerFn(getHint);
+  const [hintLevel, setHintLevel] = useState(0);
+  const [hints, setHints] = useState<Record<number, string>>({});
+  const hintMut = useMutation({
+    mutationFn: (level: number) =>
+      hintFn({ data: { assessmentId: aq.data!.assessment.id, level, code } }),
+    onSuccess: (r) => {
+      setHints((h) => ({ ...h, [r.level]: r.hint }));
+      setHintLevel((l) => Math.max(l, r.level));
+    },
+  });
+
 
   if (aq.isLoading) {
     return (
