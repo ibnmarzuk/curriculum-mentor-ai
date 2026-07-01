@@ -25,7 +25,7 @@ function CheckpointsPage() {
     );
   }
 
-  const byLevel = new Map<number, typeof q.data.checkpoints>();
+  const byLevel = new Map<number, NonNullable<typeof q.data>["checkpoints"]>();
   for (const c of q.data?.checkpoints ?? []) {
     const arr = byLevel.get(c.level) ?? [];
     arr.push(c);
