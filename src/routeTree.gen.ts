@@ -16,10 +16,12 @@ import { Route as AppTracksRouteImport } from './routes/_app.tracks'
 import { Route as AppProfileRouteImport } from './routes/_app.profile'
 import { Route as AppMentorRouteImport } from './routes/_app.mentor'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
+import { Route as AppCheckpointsRouteImport } from './routes/_app.checkpoints'
 import { Route as AppBrowseRouteImport } from './routes/_app.browse'
 import { Route as AppAssessmentsRouteImport } from './routes/_app.assessments'
 import { Route as AppTracksSlugRouteImport } from './routes/_app.tracks.$slug'
 import { Route as AppSubjectsSplatRouteImport } from './routes/_app.subjects.$'
+import { Route as AppCheckpointsSlugRouteImport } from './routes/_app.checkpoints.$slug'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -55,6 +57,11 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCheckpointsRoute = AppCheckpointsRouteImport.update({
+  id: '/checkpoints',
+  path: '/checkpoints',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppBrowseRoute = AppBrowseRouteImport.update({
   id: '/browse',
   path: '/browse',
@@ -75,16 +82,23 @@ const AppSubjectsSplatRoute = AppSubjectsSplatRouteImport.update({
   path: '/subjects/$',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCheckpointsSlugRoute = AppCheckpointsSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => AppCheckpointsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/assessments': typeof AppAssessmentsRoute
   '/browse': typeof AppBrowseRoute
+  '/checkpoints': typeof AppCheckpointsRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
   '/mentor': typeof AppMentorRoute
   '/profile': typeof AppProfileRoute
   '/tracks': typeof AppTracksRouteWithChildren
+  '/checkpoints/$slug': typeof AppCheckpointsSlugRoute
   '/subjects/$': typeof AppSubjectsSplatRoute
   '/tracks/$slug': typeof AppTracksSlugRoute
 }
@@ -93,10 +107,12 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/assessments': typeof AppAssessmentsRoute
   '/browse': typeof AppBrowseRoute
+  '/checkpoints': typeof AppCheckpointsRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
   '/mentor': typeof AppMentorRoute
   '/profile': typeof AppProfileRoute
   '/tracks': typeof AppTracksRouteWithChildren
+  '/checkpoints/$slug': typeof AppCheckpointsSlugRoute
   '/subjects/$': typeof AppSubjectsSplatRoute
   '/tracks/$slug': typeof AppTracksSlugRoute
 }
@@ -107,10 +123,12 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_app/assessments': typeof AppAssessmentsRoute
   '/_app/browse': typeof AppBrowseRoute
+  '/_app/checkpoints': typeof AppCheckpointsRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/mentor': typeof AppMentorRoute
   '/_app/profile': typeof AppProfileRoute
   '/_app/tracks': typeof AppTracksRouteWithChildren
+  '/_app/checkpoints/$slug': typeof AppCheckpointsSlugRoute
   '/_app/subjects/$': typeof AppSubjectsSplatRoute
   '/_app/tracks/$slug': typeof AppTracksSlugRoute
 }
@@ -121,10 +139,12 @@ export interface FileRouteTypes {
     | '/login'
     | '/assessments'
     | '/browse'
+    | '/checkpoints'
     | '/dashboard'
     | '/mentor'
     | '/profile'
     | '/tracks'
+    | '/checkpoints/$slug'
     | '/subjects/$'
     | '/tracks/$slug'
   fileRoutesByTo: FileRoutesByTo
@@ -133,10 +153,12 @@ export interface FileRouteTypes {
     | '/login'
     | '/assessments'
     | '/browse'
+    | '/checkpoints'
     | '/dashboard'
     | '/mentor'
     | '/profile'
     | '/tracks'
+    | '/checkpoints/$slug'
     | '/subjects/$'
     | '/tracks/$slug'
   id:
@@ -146,10 +168,12 @@ export interface FileRouteTypes {
     | '/login'
     | '/_app/assessments'
     | '/_app/browse'
+    | '/_app/checkpoints'
     | '/_app/dashboard'
     | '/_app/mentor'
     | '/_app/profile'
     | '/_app/tracks'
+    | '/_app/checkpoints/$slug'
     | '/_app/subjects/$'
     | '/_app/tracks/$slug'
   fileRoutesById: FileRoutesById
@@ -211,6 +235,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/checkpoints': {
+      id: '/_app/checkpoints'
+      path: '/checkpoints'
+      fullPath: '/checkpoints'
+      preLoaderRoute: typeof AppCheckpointsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/browse': {
       id: '/_app/browse'
       path: '/browse'
@@ -239,8 +270,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSubjectsSplatRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/checkpoints/$slug': {
+      id: '/_app/checkpoints/$slug'
+      path: '/$slug'
+      fullPath: '/checkpoints/$slug'
+      preLoaderRoute: typeof AppCheckpointsSlugRouteImport
+      parentRoute: typeof AppCheckpointsRoute
+    }
   }
 }
+
+interface AppCheckpointsRouteChildren {
+  AppCheckpointsSlugRoute: typeof AppCheckpointsSlugRoute
+}
+
+const AppCheckpointsRouteChildren: AppCheckpointsRouteChildren = {
+  AppCheckpointsSlugRoute: AppCheckpointsSlugRoute,
+}
+
+const AppCheckpointsRouteWithChildren = AppCheckpointsRoute._addFileChildren(
+  AppCheckpointsRouteChildren,
+)
 
 interface AppTracksRouteChildren {
   AppTracksSlugRoute: typeof AppTracksSlugRoute
@@ -257,6 +307,7 @@ const AppTracksRouteWithChildren = AppTracksRoute._addFileChildren(
 interface AppRouteChildren {
   AppAssessmentsRoute: typeof AppAssessmentsRoute
   AppBrowseRoute: typeof AppBrowseRoute
+  AppCheckpointsRoute: typeof AppCheckpointsRouteWithChildren
   AppDashboardRoute: typeof AppDashboardRoute
   AppMentorRoute: typeof AppMentorRoute
   AppProfileRoute: typeof AppProfileRoute
@@ -267,6 +318,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAssessmentsRoute: AppAssessmentsRoute,
   AppBrowseRoute: AppBrowseRoute,
+  AppCheckpointsRoute: AppCheckpointsRouteWithChildren,
   AppDashboardRoute: AppDashboardRoute,
   AppMentorRoute: AppMentorRoute,
   AppProfileRoute: AppProfileRoute,
@@ -284,13 +336,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

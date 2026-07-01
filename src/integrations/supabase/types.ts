@@ -14,6 +14,106 @@ export type Database = {
   }
   public: {
     Tables: {
+      assessment_attempts: {
+        Row: {
+          assessment_id: string
+          attempt_number: number
+          created_at: string
+          feedback: string | null
+          graded_at: string | null
+          id: string
+          passed: boolean | null
+          score: number | null
+          status: string
+          submitted_at: string
+          user_id: string
+        }
+        Insert: {
+          assessment_id: string
+          attempt_number: number
+          created_at?: string
+          feedback?: string | null
+          graded_at?: string | null
+          id?: string
+          passed?: boolean | null
+          score?: number | null
+          status?: string
+          submitted_at?: string
+          user_id: string
+        }
+        Update: {
+          assessment_id?: string
+          attempt_number?: number
+          created_at?: string
+          feedback?: string | null
+          graded_at?: string | null
+          id?: string
+          passed?: boolean | null
+          score?: number | null
+          status?: string
+          submitted_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_attempts_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assessment_feedback: {
+        Row: {
+          attempt_id: string
+          created_at: string
+          criterion_description: string | null
+          criterion_id: string
+          feedback: string | null
+          id: string
+          improvement_recommendation: string | null
+          passed: boolean | null
+          related_skills: string[] | null
+          score: number | null
+          user_id: string
+        }
+        Insert: {
+          attempt_id: string
+          created_at?: string
+          criterion_description?: string | null
+          criterion_id: string
+          feedback?: string | null
+          id?: string
+          improvement_recommendation?: string | null
+          passed?: boolean | null
+          related_skills?: string[] | null
+          score?: number | null
+          user_id: string
+        }
+        Update: {
+          attempt_id?: string
+          created_at?: string
+          criterion_description?: string | null
+          criterion_id?: string
+          feedback?: string | null
+          id?: string
+          improvement_recommendation?: string | null
+          passed?: boolean | null
+          related_skills?: string[] | null
+          score?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_feedback_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_attempts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assessment_results: {
         Row: {
           assessment_id: string
@@ -106,6 +206,131 @@ export type Database = {
           teaches_skills?: string[]
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      checkpoint_submissions: {
+        Row: {
+          attempt_number: number
+          checkpoint_id: string
+          created_at: string
+          duration_ms: number | null
+          feedback: string | null
+          grade: string | null
+          id: string
+          language: string
+          level: number
+          passed: boolean
+          passed_hidden: number
+          passed_visible: number
+          score: number
+          source_code: string
+          total_hidden: number
+          total_visible: number
+          user_id: string
+        }
+        Insert: {
+          attempt_number?: number
+          checkpoint_id: string
+          created_at?: string
+          duration_ms?: number | null
+          feedback?: string | null
+          grade?: string | null
+          id?: string
+          language: string
+          level: number
+          passed?: boolean
+          passed_hidden?: number
+          passed_visible?: number
+          score?: number
+          source_code: string
+          total_hidden?: number
+          total_visible?: number
+          user_id: string
+        }
+        Update: {
+          attempt_number?: number
+          checkpoint_id?: string
+          created_at?: string
+          duration_ms?: number | null
+          feedback?: string | null
+          grade?: string | null
+          id?: string
+          language?: string
+          level?: number
+          passed?: boolean
+          passed_hidden?: number
+          passed_visible?: number
+          score?: number
+          source_code?: string
+          total_hidden?: number
+          total_visible?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checkpoint_submissions_checkpoint_id_fkey"
+            columns: ["checkpoint_id"]
+            isOneToOne: false
+            referencedRelation: "checkpoints"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      checkpoints: {
+        Row: {
+          created_at: string
+          description: string
+          difficulty: string
+          examples: string | null
+          function_signature: string | null
+          hidden_tests: Json
+          hints: Json
+          id: string
+          language: string
+          level: number
+          slug: string
+          solution: string | null
+          sort_order: number
+          starter_code: string
+          title: string
+          visible_tests: Json
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          difficulty?: string
+          examples?: string | null
+          function_signature?: string | null
+          hidden_tests?: Json
+          hints?: Json
+          id?: string
+          language?: string
+          level: number
+          slug: string
+          solution?: string | null
+          sort_order?: number
+          starter_code?: string
+          title: string
+          visible_tests?: Json
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          difficulty?: string
+          examples?: string | null
+          function_signature?: string | null
+          hidden_tests?: Json
+          hints?: Json
+          id?: string
+          language?: string
+          level?: number
+          slug?: string
+          solution?: string | null
+          sort_order?: number
+          starter_code?: string
+          title?: string
+          visible_tests?: Json
         }
         Relationships: []
       }
@@ -423,6 +648,47 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "skills"
             referencedColumns: ["slug"]
+          },
+        ]
+      }
+      submission_artifacts: {
+        Row: {
+          attempt_id: string
+          created_at: string
+          diff_content: string | null
+          file_content: string
+          filename: string
+          id: string
+          language: string | null
+          user_id: string
+        }
+        Insert: {
+          attempt_id: string
+          created_at?: string
+          diff_content?: string | null
+          file_content: string
+          filename?: string
+          id?: string
+          language?: string | null
+          user_id: string
+        }
+        Update: {
+          attempt_id?: string
+          created_at?: string
+          diff_content?: string | null
+          file_content?: string
+          filename?: string
+          id?: string
+          language?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submission_artifacts_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_attempts"
+            referencedColumns: ["id"]
           },
         ]
       }

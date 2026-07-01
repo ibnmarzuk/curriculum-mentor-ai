@@ -2,8 +2,13 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import Editor from "@monaco-editor/react";
-import { Loader2, Sparkles, Play, Check, X } from "lucide-react";
-import { getOrCreateAssessment, gradeAssessment } from "@/lib/assessment.functions";
+import { Loader2, Play, Check, X, Lightbulb } from "lucide-react";
+import {
+  getOrCreateAssessment,
+  gradeAssessment,
+  listAssessmentAttempts,
+  getHint,
+} from "@/lib/assessment.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { MarkdownView } from "./MarkdownView";
 
@@ -37,8 +42,29 @@ export function AssessmentPanel({ subjectPath }: { subjectPath: string }) {
       qc.invalidateQueries({ queryKey: ["readiness", subjectPath] });
       qc.invalidateQueries({ queryKey: ["recommendation", subjectPath] });
       qc.invalidateQueries({ queryKey: ["my-assessment-results"] });
+      qc.invalidateQueries({ queryKey: ["attempts", aq.data?.assessment.id] });
     },
   });
+
+  const attemptsFn = useServerFn(listAssessmentAttempts);
+  const attemptsQ = useQuery({
+    queryKey: ["attempts", aq.data?.assessment?.id],
+    queryFn: () => attemptsFn({ data: { assessmentId: aq.data!.assessment.id } }),
+    enabled: authed === true && !!aq.data?.assessment?.id,
+  });
+
+  const hintFn = useServerFn(getHint);
+  const [hintLevel, setHintLevel] = useState(0);
+  const [hints, setHints] = useState<Record<number, string>>({});
+  const hintMut = useMutation({
+    mutationFn: (level: number) =>
+      hintFn({ data: { assessmentId: aq.data!.assessment.id, level, code } }),
+    onSuccess: (r) => {
+      setHints((h) => ({ ...h, [r.level]: r.hint }));
+      setHintLevel((l) => Math.max(l, r.level));
+    },
+  });
+
 
   if (aq.isLoading) {
     return (
@@ -133,7 +159,97 @@ export function AssessmentPanel({ subjectPath }: { subjectPath: string }) {
             )}
           </div>
         )}
+
+        {/* Hint ladder */}
+        <div className="mt-6 border border-border rounded-md p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Lightbulb size={14} className="text-primary" />
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">Hint ladder</div>
+            <span className="ml-auto text-[10px] font-mono text-muted-foreground">
+              {hintLevel}/5 unlocked
+            </span>
+          </div>
+          <div className="space-y-2">
+            {[1, 2, 3, 4, 5].map((lvl) => {
+              const label = ["Conceptual nudge", "Implementation direction", "Concrete technique", "Code pattern", "Solution snippet"][lvl - 1];
+              const unlocked = !!hints[lvl];
+              const canUnlock = lvl === hintLevel + 1;
+              return (
+                <div key={lvl} className="text-sm">
+                  <button
+                    onClick={() => canUnlock && !hintMut.isPending && hintMut.mutate(lvl)}
+                    disabled={!canUnlock || hintMut.isPending || authed === false}
+                    className="w-full text-left flex items-center gap-2 px-2 py-1.5 rounded border border-border hover:border-primary disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <span className="font-mono text-xs text-muted-foreground">L{lvl}</span>
+                    <span>{label}</span>
+                    {unlocked && <Check size={12} className="ml-auto text-primary" />}
+                    {!unlocked && canUnlock && <span className="ml-auto text-[10px] uppercase tracking-wider text-primary">Unlock</span>}
+                  </button>
+                  {unlocked && (
+                    <div className="pl-6 pt-2 pb-1">
+                      <MarkdownView>{hints[lvl]}</MarkdownView>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          {hintMut.error && (
+            <div className="mt-2 text-xs text-destructive">{(hintMut.error as Error).message}</div>
+          )}
+        </div>
+
+        {/* Attempt timeline */}
+        {authed && attemptsQ.data && attemptsQ.data.attempts.length > 0 && (
+          <div className="mt-6">
+            <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+              Attempt timeline
+            </div>
+            <ol className="space-y-1">
+              {attemptsQ.data.attempts.map((a) => {
+                const perCrit = attemptsQ.data.feedback.filter((f) => f.attempt_id === a.id);
+                return (
+                  <li key={a.id} className="border border-border rounded-md bg-surface/30">
+                    <details>
+                      <summary className="cursor-pointer flex items-center gap-3 px-3 py-2 text-sm">
+                        <span className="font-mono text-xs text-muted-foreground">#{a.attempt_number}</span>
+                        {a.passed ? <Check size={12} className="text-primary" /> : <X size={12} className="text-destructive" />}
+                        <span className={`serif ${a.passed ? "text-primary" : "text-destructive"}`}>
+                          {a.score != null ? Math.round(Number(a.score)) : "—"}
+                        </span>
+                        <span className="ml-auto text-[10px] text-muted-foreground">
+                          {new Date(a.submitted_at).toLocaleString()}
+                        </span>
+                      </summary>
+                      <div className="px-3 py-2 border-t border-border text-xs space-y-2">
+                        {a.feedback && <MarkdownView>{a.feedback}</MarkdownView>}
+                        {perCrit.length > 0 && (
+                          <ul className="space-y-1">
+                            {perCrit.map((f) => (
+                              <li key={f.criterion_id} className="flex items-start gap-2">
+                                {f.passed ? <Check size={11} className="text-primary mt-0.5 shrink-0" /> : <X size={11} className="text-destructive mt-0.5 shrink-0" />}
+                                <div>
+                                  <div>{f.criterion_description ?? f.criterion_id}</div>
+                                  {f.feedback && <div className="text-muted-foreground">{f.feedback}</div>}
+                                  {f.improvement_recommendation && (
+                                    <div className="text-muted-foreground italic mt-0.5">→ {f.improvement_recommendation}</div>
+                                  )}
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    </details>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
+        )}
       </div>
+
 
       <div className="flex flex-col min-h-0">
         <div className="flex items-center gap-2 px-3 py-2 border-b border-border shrink-0">
