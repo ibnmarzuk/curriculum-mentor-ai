@@ -102,7 +102,7 @@ export const submitCheckpoint = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const { data: cp } = await supabaseAdmin
       .from("checkpoints")
-      .select("id, title, language, description, visible_tests, hidden_tests, solution")
+      .select("id, level, title, language, description, visible_tests, hidden_tests, solution")
       .eq("slug", data.slug)
       .single();
     if (!cp) throw new Error("Checkpoint not found");
