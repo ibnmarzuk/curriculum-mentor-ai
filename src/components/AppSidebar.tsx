@@ -7,6 +7,7 @@ import {
   User,
   BookOpen,
   Map,
+  Target,
 } from "lucide-react";
 import {
   Sidebar,
