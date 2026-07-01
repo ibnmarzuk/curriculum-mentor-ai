@@ -244,6 +244,56 @@ export const gradeAssessment = createServerFn({ method: "POST" })
     const score = Math.max(0, Math.min(100, parsed.score));
     const passed = score >= 70;
 
+    // Determine next attempt number
+    const { data: prior } = await supabase
+      .from("assessment_attempts")
+      .select("attempt_number")
+      .eq("user_id", userId)
+      .eq("assessment_id", assessment.id)
+      .order("attempt_number", { ascending: false })
+      .limit(1);
+    const attemptNumber = ((prior?.[0]?.attempt_number as number) ?? 0) + 1;
+
+    const { data: attempt } = await supabase
+      .from("assessment_attempts")
+      .insert({
+        user_id: userId,
+        assessment_id: assessment.id,
+        attempt_number: attemptNumber,
+        score,
+        passed,
+        status: "graded",
+        feedback: parsed.feedback,
+        graded_at: new Date().toISOString(),
+      })
+      .select("id")
+      .single();
+
+    if (attempt) {
+      await supabase.from("submission_artifacts").insert({
+        attempt_id: attempt.id,
+        user_id: userId,
+        filename: `attempt-${attemptNumber}.${assessment.language}`,
+        file_content: data.code,
+        language: assessment.language,
+      });
+      const rubricMap = new Map(rubric.map((r) => [r.id, r]));
+      const feedbackRows = parsed.criteria.map((c, idx) => ({
+        attempt_id: attempt.id,
+        user_id: userId,
+        criterion_id: c.id,
+        criterion_description: rubricMap.get(c.id)?.description ?? null,
+        passed: c.passed,
+        score: c.passed ? 100 : 0,
+        feedback: c.note,
+        improvement_recommendation: parsed.improvements?.[idx] ?? null,
+        related_skills: (assessment.teaches_skills as string[] | null) ?? [],
+      }));
+      if (feedbackRows.length) {
+        await supabase.from("assessment_feedback").insert(feedbackRows);
+      }
+    }
+
     await supabase.from("assessment_results").insert({
       user_id: userId,
       assessment_id: assessment.id,
@@ -279,6 +329,7 @@ export const gradeAssessment = createServerFn({ method: "POST" })
     return {
       score,
       passed,
+      attemptNumber,
       feedback: parsed.feedback,
       criteria: parsed.criteria,
       improvements: parsed.improvements ?? [],
@@ -287,6 +338,92 @@ export const gradeAssessment = createServerFn({ method: "POST" })
       gettingStarted: (assessment.getting_started as string | null) ?? "",
     };
   });
+
+// ----------------- Attempts timeline & hints -----------------
+
+export const listAssessmentAttempts = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { assessmentId: string }) =>
+    z.object({ assessmentId: z.string().uuid() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: attempts } = await supabase
+      .from("assessment_attempts")
+      .select("id, attempt_number, score, passed, feedback, submitted_at, graded_at")
+      .eq("user_id", userId)
+      .eq("assessment_id", data.assessmentId)
+      .order("attempt_number", { ascending: false });
+    const ids = (attempts ?? []).map((a) => a.id);
+    const { data: feedback } = ids.length
+      ? await supabase
+          .from("assessment_feedback")
+          .select("attempt_id, criterion_id, criterion_description, passed, feedback, improvement_recommendation")
+          .in("attempt_id", ids)
+      : { data: [] as Array<{ attempt_id: string; criterion_id: string; criterion_description: string | null; passed: boolean | null; feedback: string | null; improvement_recommendation: string | null }> };
+    const { data: artifacts } = ids.length
+      ? await supabase
+          .from("submission_artifacts")
+          .select("attempt_id, filename, file_content, language")
+          .in("attempt_id", ids)
+      : { data: [] as Array<{ attempt_id: string; filename: string; file_content: string; language: string | null }> };
+    return {
+      attempts: attempts ?? [],
+      feedback: feedback ?? [],
+      artifacts: artifacts ?? [],
+    };
+  });
+
+export const getHint = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { assessmentId: string; level: number; code: string }) =>
+    z
+      .object({
+        assessmentId: z.string().uuid(),
+        level: z.number().int().min(1).max(5),
+        code: z.string().max(50000).default(""),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { data: assessment } = await supabaseAdmin
+      .from("assessments")
+      .select("prompt, language, solution, rubric")
+      .eq("id", data.assessmentId)
+      .single();
+    if (!assessment) throw new Error("Assessment not found.");
+
+    const guidance = [
+      "Level 1: gentle conceptual nudge only. Do NOT show code or name specific APIs.",
+      "Level 2: specific implementation direction — describe the approach or algorithm, still no code.",
+      "Level 3: point at concrete techniques, functions, or files/patterns in the language. Small pseudocode allowed.",
+      "Level 4: show a short code pattern (5-10 lines) illustrating the technique, but not the full solution.",
+      "Level 5: reveal a key snippet from the reference solution with brief explanation.",
+    ][data.level - 1];
+
+    const json = await callAI({
+      model: MODEL,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a patient coding coach. Provide a single hint at the requested level. Never leak the full solution unless level is 5. Keep it under 120 words. Return markdown.",
+        },
+        {
+          role: "user",
+          content:
+            `Hint level ${data.level}.\n${guidance}\n\nTask:\n${assessment.prompt}\n\nLanguage: ${assessment.language}\n\n` +
+            (data.code ? `Student's current code:\n\`\`\`${assessment.language}\n${data.code.slice(0, 4000)}\n\`\`\`\n` : "") +
+            (data.level >= 4 && assessment.solution
+              ? `Reference solution (use only as inspiration for the snippet):\n\`\`\`${assessment.language}\n${(assessment.solution as string).slice(0, 3000)}\n\`\`\``
+              : ""),
+        },
+      ],
+    });
+    const hint = json.choices?.[0]?.message?.content ?? "No hint available.";
+    return { hint, level: data.level };
+  });
+
 
 // ----------------- My results -----------------
 
