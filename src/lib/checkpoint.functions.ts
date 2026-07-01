@@ -200,7 +200,7 @@ export const submitCheckpoint = createServerFn({ method: "POST" })
     await supabase.from("checkpoint_submissions").insert({
       user_id: userId,
       checkpoint_id: cp.id,
-      level: 0, // set below via update? just fetch level
+      level: cp.level,
       attempt_number: attemptNumber,
       source_code: data.code,
       language: cp.language,
