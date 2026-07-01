@@ -28,6 +28,7 @@ const NAV = [
   { title: "Browse", url: "/browse", icon: Compass },
   { title: "Mentor", url: "/mentor", icon: MessageSquare },
   { title: "Assessments", url: "/assessments", icon: GraduationCap },
+  { title: "Checkpoints", url: "/checkpoints", icon: Target },
   { title: "Profile", url: "/profile", icon: User },
 ] as const;
 
